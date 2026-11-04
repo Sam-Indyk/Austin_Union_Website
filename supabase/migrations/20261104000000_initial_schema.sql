@@ -27,15 +27,11 @@ end $$;
 -- ---------------------------------------------------------------------------
 create table public.people (
   id uuid primary key default gen_random_uuid(),
+  -- Where we send mail. Every address the person uses (including this one)
+  -- is listed in person_emails, and any of them can be used to sign in.
   email citext not null unique,
   first_name text,
   last_name text,
-  -- The login linked to this person (set when they first sign in).
-  user_id uuid unique references auth.users (id) on delete set null,
-  -- Their verified @uaustin.org Google account, required for voting membership.
-  uaustin_email citext unique check (uaustin_email is null or uaustin_email like '%@uaustin.org'),
-  -- Set when they actually sign in with that address (Google or email link).
-  uaustin_verified_at timestamptz,
   -- Expected UATX graduation year, if known. Used to retire voting membership.
   class_year smallint check (class_year between 2020 and 2100),
   -- Mailing list
@@ -51,6 +47,62 @@ create table public.people (
 );
 create trigger people_updated before update on public.people for each row execute function public.set_updated_at();
 create index people_subscribed_idx on public.people (subscribed) where subscribed;
+
+-- True for UATX addresses, including subdomains (e.g. @student.uaustin.org).
+create or replace function public.is_uatx_email(e text) returns boolean
+language sql immutable as $$ select lower(e) ~ '@([a-z0-9-]+\.)*uaustin\.org$' $$;
+
+-- All addresses a person uses. Signing in with any verified address reaches the
+-- same person, so someone with a Google account, a UATX account and a personal
+-- address has one record, not three.
+create table public.person_emails (
+  email citext primary key,
+  person_id uuid not null references public.people (id) on delete cascade,
+  -- Set once they have proven they control it (signed in with it, or entered a code sent to it).
+  verified_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index person_emails_person_idx on public.person_emails (person_id);
+
+-- Keep the contact address listed among the person's addresses.
+create or replace function public.sync_primary_email() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.person_emails (email, person_id) values (new.email, new.id)
+  on conflict (email) do nothing;
+  return new;
+end $$;
+create trigger people_primary_email after insert or update of email on public.people
+  for each row execute function public.sync_primary_email();
+
+-- A person can have several logins (e.g. Google with one address, an email code
+-- with another); each login belongs to exactly one person.
+create table public.auth_links (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  person_id uuid not null references public.people (id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+create index auth_links_person_idx on public.auth_links (person_id);
+
+-- Short-lived codes for verifying an extra address (and other email checks).
+create table public.email_codes (
+  id uuid primary key default gen_random_uuid(),
+  email citext not null,
+  purpose text not null check (purpose in ('link_email', 'vote')),
+  person_id uuid references public.people (id) on delete cascade,
+  code_hash text not null,
+  attempts smallint not null default 0,
+  expires_at timestamptz not null default now() + interval '15 minutes',
+  used_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index email_codes_lookup_idx on public.email_codes (email, purpose) where used_at is null;
+
+-- Is this person a verified UATX student address holder?
+create or replace function public.has_verified_uatx(p uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.person_emails where person_id = p and verified_at is not null and public.is_uatx_email(email))
+$$;
 
 create type public.staff_role as enum ('editor', 'admin');
 
@@ -97,14 +149,14 @@ $$;
 -- ---------------------------------------------------------------------------
 create or replace function public.current_person_id() returns uuid
 language sql stable security definer set search_path = public as $$
-  select id from public.people where user_id = auth.uid()
+  select person_id from public.auth_links where user_id = auth.uid()
 $$;
 
 create or replace function public.is_staff(min_role public.staff_role default 'editor') returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (
-    select 1 from public.staff s join public.people p on p.id = s.person_id
-    where p.user_id = auth.uid() and s.role >= min_role
+    select 1 from public.staff s join public.auth_links a on a.person_id = s.person_id
+    where a.user_id = auth.uid() and s.role >= min_role
   )
 $$;
 
@@ -113,36 +165,41 @@ $$;
 create or replace function public.has_membership(kinds public.membership_kind[] default null) returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (
-    select 1 from public.memberships m join public.people p on p.id = m.person_id
-    where p.user_id = auth.uid()
+    select 1 from public.memberships m join public.auth_links a on a.person_id = m.person_id
+    where a.user_id = auth.uid()
       and public.membership_is_current(m)
       and (kinds is null or m.kind = any (kinds))
   )
 $$;
 
--- When someone signs in for the first time, attach the login to their existing
--- person record (matched by email) or create one. Google sign-ins from
--- @uaustin.org also record the verified UATX address.
+-- When a login is created (first Google sign-in or email code), attach it to the
+-- person who owns that address, or create a person. Either way the address is
+-- now verified: they just proved they control it.
 create or replace function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare
   v_email citext := lower(new.email);
-  v_uatx citext := case when lower(new.email) like '%@uaustin.org' then lower(new.email) end;
+  v_person uuid;
   v_first text := coalesce(new.raw_user_meta_data ->> 'given_name', split_part(coalesce(new.raw_user_meta_data ->> 'full_name', ''), ' ', 1));
   v_last text := coalesce(new.raw_user_meta_data ->> 'family_name', nullif(regexp_replace(coalesce(new.raw_user_meta_data ->> 'full_name', ''), '^\S+\s*', ''), ''));
 begin
-  update public.people
-     set user_id = new.id,
-         uaustin_email = coalesce(uaustin_email, v_uatx),
-         uaustin_verified_at = case when v_uatx is not null then now() else uaustin_verified_at end,
-         first_name = coalesce(first_name, nullif(v_first, '')),
-         last_name = coalesce(last_name, v_last)
-   where (email = v_email or uaustin_email = v_email) and user_id is null;
-  if not found then
-    insert into public.people (email, user_id, uaustin_email, uaustin_verified_at, first_name, last_name, source)
-    values (v_email, new.id, v_uatx, case when v_uatx is not null then now() end, nullif(v_first, ''), v_last, 'signin')
-    on conflict (email) do nothing;
+  if v_email is null or v_email = '' then
+    return new;
   end if;
+  select person_id into v_person from public.person_emails where email = v_email;
+  if v_person is null then
+    insert into public.people (email, first_name, last_name, source)
+    values (v_email, nullif(v_first, ''), nullif(v_last, ''), 'signin')
+    returning id into v_person;
+  else
+    update public.people
+       set first_name = coalesce(first_name, nullif(v_first, '')),
+           last_name = coalesce(last_name, nullif(v_last, ''))
+     where id = v_person;
+  end if;
+  update public.person_emails set verified_at = coalesce(verified_at, now()) where email = v_email;
+  insert into public.auth_links (user_id, person_id) values (new.id, v_person)
+  on conflict (user_id) do nothing;
   return new;
 end $$;
 
@@ -407,6 +464,7 @@ create table public.votes (
   description text not null default '',
   event_id uuid references public.events (id) on delete set null,
   format public.vote_format not null default 'single',
+  -- For pre_post votes the default is 'swing': the side whose share of the vote grew most.
   winner_rule public.winner_rule not null default 'plurality',
   phase public.vote_phase not null default 'draft',
   phase_changed_at timestamptz,
@@ -436,6 +494,8 @@ create table public.vote_options (
   label text not null,
   description text,
   color text check (color ~ '^#[0-9a-fA-F]{6}$'),
+  -- 'side' options can win; 'neutral' ones (e.g. Undecided) are counted but never win.
+  role text not null default 'side' check (role in ('side', 'neutral')),
   sort_order int not null default 0
 );
 create index vote_options_vote_idx on public.vote_options (vote_id, sort_order);
@@ -483,6 +543,9 @@ revoke execute on function public.vote_transitions(uuid) from anon, authenticate
 -- Row level security
 -- ---------------------------------------------------------------------------
 alter table public.people enable row level security;
+alter table public.person_emails enable row level security;
+alter table public.auth_links enable row level security;
+alter table public.email_codes enable row level security;
 alter table public.staff enable row level security;
 alter table public.memberships enable row level security;
 alter table public.site_content enable row level security;
@@ -499,7 +562,12 @@ alter table public.vote_options enable row level security;
 alter table public.ballots enable row level security;
 
 -- People: staff manage; everyone can read their own record.
-create policy people_self_read on public.people for select to authenticated using (user_id = auth.uid());
+create policy people_self_read on public.people for select to authenticated using (id = public.current_person_id());
+create policy person_emails_self_read on public.person_emails for select to authenticated using (person_id = public.current_person_id());
+create policy person_emails_staff_all on public.person_emails for all to authenticated using (public.is_staff()) with check (public.is_staff());
+create policy auth_links_self_read on public.auth_links for select to authenticated using (user_id = auth.uid());
+create policy auth_links_staff_read on public.auth_links for select to authenticated using (public.is_staff());
+-- email_codes: no policies — only the server (service role) touches them.
 create policy people_staff_all on public.people for all to authenticated using (public.is_staff()) with check (public.is_staff());
 
 -- Staff list: staff can see it; only admins change it.
@@ -572,7 +640,7 @@ declare
   v_id uuid;
   v_created boolean := false;
 begin
-  select id into v_id from public.people where email = lower(p_email) or uaustin_email = lower(p_email) limit 1;
+  select person_id into v_id from public.person_emails where email = lower(p_email);
   if v_id is null then
     insert into public.people (email, first_name, last_name, source, subscribed, subscribed_at)
     values (lower(p_email), nullif(p_first, ''), nullif(p_last, ''), p_source, p_opt_in <> 'none', case when p_opt_in <> 'none' then now() end)

@@ -45,7 +45,7 @@ export default async function MissionPage() {
           </h2>
           <p className="mission-contact__intro">{c.intro}</p>
           <SocialLinks links={settings.social} />
-          <ContactForm variant="mission" page="/about-4" />
+          <ContactForm variant="mission" page="/mission" />
         </div>
       </section>
     </div>

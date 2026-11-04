@@ -3,21 +3,51 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 
 export const NAV = [
   { href: '/', label: 'HOME' },
-  { href: '/events-1', label: 'EVENTS' },
-  { href: '/about-4', label: 'MISSION' },
+  { href: '/events', label: 'EVENTS' },
+  { href: '/mission', label: 'MISSION' },
   { href: '/team', label: 'TEAM' },
-  { href: '/contact-8', label: 'CONTACT' },
+  { href: '/contact', label: 'CONTACT' },
   { href: '/donate', label: 'DONATE' },
 ];
 
-export function SiteHeader() {
-  const pathname = usePathname();
+// Supabase keeps the session in cookies named sb-<project>-auth-token (possibly
+// chunked as .0, .1). Checking for one in the browser decides LOGIN vs ACCOUNT
+// without making every public page render per-visitor on the server.
+const hasSession = () => /(?:^|;\s*)sb-[^=]+-auth-token(?:\.0)?=/.test(document.cookie);
+
+// Re-check right after mount (the server can't know) and whenever the tab
+// regains focus (e.g. after signing in or out in another tab).
+function subscribe(onChange: () => void) {
+  const t = setTimeout(onChange, 0);
+  window.addEventListener('focus', onChange);
+  document.addEventListener('visibilitychange', onChange);
+  return () => {
+    clearTimeout(t);
+    window.removeEventListener('focus', onChange);
+    document.removeEventListener('visibilitychange', onChange);
+  };
+}
+
+function useSignedIn(): boolean {
+  return useSyncExternalStore(subscribe, hasSession, () => false);
+}
+
+/** Reads the current path; rendered inside <Suspense> so pages with unknown URLs still prerender. */
+export function SiteHeaderWithPath() {
+  return <SiteHeader pathname={usePathname()} />;
+}
+
+export function SiteHeader({ pathname }: { pathname: string | null }) {
   const [open, setOpen] = useState(false);
-  const current = (href: string) => (pathname === href ? 'page' : undefined);
+  const signedIn = useSignedIn();
+  const current = (href: string) =>
+    pathname && (pathname === href || (href !== '/' && pathname.startsWith(href + '/'))) ? ('page' as const) : undefined;
+  const account = signedIn ? { href: '/account', label: 'ACCOUNT' } : { href: '/login', label: 'LOGIN' };
+  const items = [...NAV, account];
 
   return (
     <header className="site-header">
@@ -25,7 +55,7 @@ export function SiteHeader() {
         Skip to Main Content
       </a>
       <nav className="site-nav" aria-label="Site">
-        {NAV.map((item) => (
+        {items.map((item) => (
           <Link key={item.href} href={item.href} aria-current={current(item.href)}>
             {item.label}
           </Link>
@@ -48,7 +78,7 @@ export function SiteHeader() {
         <span />
       </button>
       <nav id="mobile-menu" className="mobile-menu" hidden={!open} aria-label="Site">
-        {NAV.map((item) => (
+        {items.map((item) => (
           <Link key={item.href} href={item.href} aria-current={current(item.href)} onClick={() => setOpen(false)}>
             {item.label}
           </Link>

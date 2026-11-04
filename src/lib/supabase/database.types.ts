@@ -5,7 +5,27 @@ export type Database = {
   
   "public": {
           Tables: {
-            "ballots": {
+            "auth_links": {
+                  Row: {
+                    "created_at": string,"person_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"person_id": string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"person_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "auth_links_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"ballots": {
                   Row: {
                     "created_at": string,"id": number,"option_id": string,"person_id": string | null,"round": number,"updated_at": string,"vote_id": string,"voter_key": string
                   }
@@ -80,6 +100,26 @@ isOneToOne: false
       columns: ["vote_id"]
 isOneToOne: false
       referencedRelation: "votes"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"email_codes": {
+                  Row: {
+                    "attempts": number,"code_hash": string,"created_at": string,"email": string,"expires_at": string,"id": string,"person_id": string | null,"purpose": string,"used_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempts"?: number,"code_hash": string,"created_at"?: string,"email": string,"expires_at"?: string,"id"?: string,"person_id"?: string | null,"purpose": string,"used_at"?: string | null
+                  }
+                  Update: {
+                    "attempts"?: number,"code_hash"?: string,"created_at"?: string,"email"?: string,"expires_at"?: string,"id"?: string,"person_id"?: string | null,"purpose"?: string,"used_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "email_codes_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
+      referencedRelation: "people"
       referencedColumns: ["id"]
     }
                   ]
@@ -191,17 +231,37 @@ isOneToOne: false
                   ]
                 },"people": {
                   Row: {
-                    "class_year": number | null,"created_at": string,"email": string,"first_name": string | null,"id": string,"last_name": string | null,"notes": string | null,"source": string,"subscribed": boolean,"subscribed_at": string | null,"uaustin_email": string | null,"uaustin_verified_at": string | null,"unsubscribe_token": string,"unsubscribed_at": string | null,"updated_at": string,"user_id": string | null
+                    "class_year": number | null,"created_at": string,"email": string,"first_name": string | null,"id": string,"last_name": string | null,"notes": string | null,"source": string,"subscribed": boolean,"subscribed_at": string | null,"unsubscribe_token": string,"unsubscribed_at": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "class_year"?: number | null,"created_at"?: string,"email": string,"first_name"?: string | null,"id"?: string,"last_name"?: string | null,"notes"?: string | null,"source"?: string,"subscribed"?: boolean,"subscribed_at"?: string | null,"uaustin_email"?: string | null,"uaustin_verified_at"?: string | null,"unsubscribe_token"?: string,"unsubscribed_at"?: string | null,"updated_at"?: string,"user_id"?: string | null
+                    "class_year"?: number | null,"created_at"?: string,"email": string,"first_name"?: string | null,"id"?: string,"last_name"?: string | null,"notes"?: string | null,"source"?: string,"subscribed"?: boolean,"subscribed_at"?: string | null,"unsubscribe_token"?: string,"unsubscribed_at"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "class_year"?: number | null,"created_at"?: string,"email"?: string,"first_name"?: string | null,"id"?: string,"last_name"?: string | null,"notes"?: string | null,"source"?: string,"subscribed"?: boolean,"subscribed_at"?: string | null,"uaustin_email"?: string | null,"uaustin_verified_at"?: string | null,"unsubscribe_token"?: string,"unsubscribed_at"?: string | null,"updated_at"?: string,"user_id"?: string | null
+                    "class_year"?: number | null,"created_at"?: string,"email"?: string,"first_name"?: string | null,"id"?: string,"last_name"?: string | null,"notes"?: string | null,"source"?: string,"subscribed"?: boolean,"subscribed_at"?: string | null,"unsubscribe_token"?: string,"unsubscribed_at"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     
+                  ]
+                },"person_emails": {
+                  Row: {
+                    "created_at": string,"email": string,"person_id": string,"verified_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"email": string,"person_id": string,"verified_at"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"email"?: string,"person_id"?: string,"verified_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "person_emails_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"rsvps": {
                   Row: {
@@ -297,14 +357,14 @@ isOneToOne: false
                   ]
                 },"vote_options": {
                   Row: {
-                    "color": string | null,"description": string | null,"id": string,"label": string,"sort_order": number,"vote_id": string
+                    "color": string | null,"description": string | null,"id": string,"label": string,"role": string,"sort_order": number,"vote_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "color"?: string | null,"description"?: string | null,"id"?: string,"label": string,"sort_order"?: number,"vote_id": string
+                    "color"?: string | null,"description"?: string | null,"id"?: string,"label": string,"role"?: string,"sort_order"?: number,"vote_id": string
                   }
                   Update: {
-                    "color"?: string | null,"description"?: string | null,"id"?: string,"label"?: string,"sort_order"?: number,"vote_id"?: string
+                    "color"?: string | null,"description"?: string | null,"id"?: string,"label"?: string,"role"?: string,"sort_order"?: number,"vote_id"?: string
                   }
                   Relationships: [
                     {
@@ -353,8 +413,14 @@ isOneToOne: false
 "has_membership":
 { Args: { "kinds"?: (Database["public"]['Enums']["membership_kind"])[] }; Returns: boolean
                            },
+"has_verified_uatx":
+{ Args: { "p": string }; Returns: boolean
+                           },
 "is_staff":
 { Args: { "min_role"?: Database["public"]['Enums']["staff_role"] }; Returns: boolean
+                           },
+"is_uatx_email":
+{ Args: { "e": string }; Returns: boolean
                            },
 "membership_is_current":
 { Args: { "m": Omit<Database["public"]['Tables']["memberships"]['Row'], Database["public"]['Tables']["memberships"]['ComputedFields']> }; Returns: boolean

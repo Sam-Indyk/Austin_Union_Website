@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your Austin Union sign-in code</title>
+  </head>
+  <body style="margin:0;padding:0;background:#ededE4;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ededE4;padding:32px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border:3px solid #2f2e2e;">
+            <tr>
+              <td style="background:#7f1f20;padding:28px 32px 22px;text-align:center;border-bottom:5px solid #f7b3b3;">
+                <img src="{{ .SiteURL }}/media/site/seal.png" width="72" height="72" alt="Austin Union Society" style="display:block;margin:0 auto 12px;" />
+                <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;letter-spacing:2px;color:#ffffff;">AUSTIN UNION</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px 36px 12px;font-family:Georgia,'Times New Roman',serif;color:#2f2e2e;text-align:center;">
+                <div style="font-size:22px;margin:0 0 10px;">Your sign-in code</div>
+                <div style="font-size:15px;line-height:1.6;color:#605e5e;margin:0 0 22px;">Enter this code on austinunion.org to sign in. It expires in one hour.</div>
+                <div style="font-family:'Courier New',Courier,monospace;font-size:38px;font-weight:bold;letter-spacing:10px;color:#7f1f20;background:#f0f0e9;padding:16px 10px;margin:0 0 26px;">{{ .Token }}</div>
+                <div style="font-size:15px;line-height:1.6;color:#605e5e;margin:0 0 14px;">Or sign in on this device with one tap:</div>
+                <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email" style="display:inline-block;background:#7f1f20;color:#ffffff;text-decoration:none;font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:1px;padding:12px 34px;">Sign in</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:26px 36px 30px;font-family:Georgia,'Times New Roman',serif;font-size:13px;line-height:1.6;color:#8a8888;text-align:center;">
+                If you didn’t ask to sign in, you can ignore this email.<br />Veritas per disputandem.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

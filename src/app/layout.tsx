@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { EB_Garamond, Nunito_Sans } from 'next/font/google';
 import { preload } from 'react-dom';
 import './globals.css';
+import './ui.css';
+import './app-ui.css';
 
 const garamond = EB_Garamond({
   variable: '--font-garamond',
@@ -36,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   preload('/fonts/neue-ohio-schrift.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
   preload('/fonts/neue-ohio-schrift-italic.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
   return (
-    <html lang="en" className={`${garamond.variable} ${sans.variable}`}>
+    <html lang="en" className={`${garamond.variable} ${sans.variable}`} data-scroll-behavior="smooth">
       <body>{children}</body>
     </html>
   );

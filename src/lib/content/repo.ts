@@ -9,7 +9,7 @@
 // Content comes from Supabase when it is configured, otherwise from the seed
 // module (so the site still runs without a database, e.g. for design work).
 import { cacheLife, cacheTag } from 'next/cache';
-import { hasDatabase } from '@/lib/supabase/clients';
+import { hasDatabase, publicClient } from '@/lib/supabase/clients';
 import banner from './collage-banner.json';
 import { dbSource } from './db-source';
 import mediaMeta from './media-meta.json';
@@ -155,4 +155,21 @@ export async function getAllEventSlugs() {
   cacheLife('minutes');
   cacheTag('events');
   return (await allEvents()).filter((e) => e.status !== 'draft').map((e) => e.slug);
+}
+
+/** The vote to announce on the homepage while it's running (admins toggle "feature on home"). */
+export async function getFeaturedVote(): Promise<{ slug: string; resolution: string; phase: string } | null> {
+  'use cache';
+  cacheLife('minutes');
+  cacheTag('votes');
+  if (!hasDatabase()) return null;
+  const { data } = await publicClient()
+    .from('votes')
+    .select('slug, resolution, phase')
+    .eq('feature_on_home', true)
+    .in('phase', ['initial_open', 'initial_closed', 'final_open'])
+    .order('phase_changed_at', { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+  return data;
 }

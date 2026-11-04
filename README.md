@@ -11,12 +11,19 @@ out automatically.
 desktop width (within a few pixels) and with a cleaner phone layout. Content is read
 from `src/lib/content/seed.ts` through `src/lib/content/repo.ts`.
 
-**Phase 2 — database (in progress).** Local Supabase with the full schema; the site
-reads content from it and forms (mailing list, RSVPs, contact) write to it.
+**Phase 2 — database, sign-in, admin, votes (in progress).**
+- Local Supabase; the site reads content from it and forms write to it.
+- Sign-in at `/login` with a 6-digit email code (any address) or Google. A person
+  can have several addresses; signing in with any of them reaches the same
+  account, and members can add addresses from `/account`.
+- Admin at `/admin` (officers only): overview, **People & Members** (memberships,
+  addresses, staff access), **Votes**, **Inbox**.
+- Votes at `/vote` (jumps to the open vote) and `/vote/<name>`; projector view at
+  `/vote/<name>/present`. Initial + final debate votes with swing, or single votes;
+  configurable eligibility, result visibility and secret ballots.
 
-**Next:** sign-in (Google for @uaustin.org + email links), the admin edit mode,
-votes, members and members-only pages, announcement/reminder emails, the Wix
-contact import, Swoogo registration for UATX events.
+**Next:** on-page edit mode, events admin (create/edit, RSVP list, check-in),
+announcement/reminder emails, the Wix contact import, Swoogo registration.
 
 ## Running it
 
@@ -27,6 +34,7 @@ npm run db:start      # local Supabase in Docker (first run downloads ~10 GB of 
 cp .env.example .env.local   # then paste the keys `npm run db:start` printed
 npm run db:reset && npm run db:seed   # schema + the content from the Wix site
 npm run dev           # http://localhost:3000
+npm test              # unit tests (vote arithmetic)
 ```
 
 Without `.env.local` the site still runs, serving the built-in seed content and
@@ -63,7 +71,7 @@ validation; admin screens act as the signed-in user.
 
 | Path | What |
 | --- | --- |
-| `src/app/(site)/` | Pages. Wix URLs are kept (`/events-1`, `/about-4`, `/contact-8`, `/events/<slug>`) so old links still work. |
+| `src/app/(site)/` | Pages: `/events`, `/events/<slug>`, `/mission`, `/team`, `/contact`, `/donate`, `/vote`, `/login`, `/account`, `/admin`. The old Wix addresses (`/events-1`, `/about-4`, `/contact-8`) redirect permanently. |
 | `src/lib/content/types.ts` | The content model (mirrors the future database tables). |
 | `src/lib/content/seed.ts` | Content transcribed from the Wix site. |
 | `src/lib/content/repo.ts` | All reads. Cached; event data refreshes every minute. |

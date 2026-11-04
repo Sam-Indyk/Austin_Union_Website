@@ -74,7 +74,7 @@ async function EventContent({ params }: Pick<PageProps<'/events/[slug]'>, 'param
             (isPast || e.rsvp.mode === 'native' ? (
               <>
                 <p className="event-closed">Registration is closed</p>
-                <Link href="/events-1" className="event-closed">
+                <Link href="/events" className="event-closed">
                   See other events
                 </Link>
               </>

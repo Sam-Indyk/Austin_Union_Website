@@ -2,7 +2,8 @@ import Image from 'next/image';
 import { AnnouncementCard, type CardEvent } from '@/components/home/AnnouncementCard';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { MailingListForm } from '@/components/forms/MailingListForm';
-import { blurOf, getCollageBanner, getEventTimeline, getHome } from '@/lib/content/repo';
+import { blurOf, getCollageBanner, getEventTimeline, getFeaturedVote, getHome } from '@/lib/content/repo';
+import Link from 'next/link';
 import { formatCardDate } from '@/lib/dates';
 
 /** Wrap the first word of the essay in the red drop cap ("The"). */
@@ -11,7 +12,7 @@ function withDropCap(html: string) {
 }
 
 export default async function HomePage() {
-  const [home, banner, timeline] = await Promise.all([getHome(), getCollageBanner(), getEventTimeline()]);
+  const [home, banner, timeline, liveVote] = await Promise.all([getHome(), getCollageBanner(), getEventTimeline(), getFeaturedVote()]);
 
   const cardEvents: CardEvent[] = timeline.featured.map((e) => ({
     slug: e.slug,
@@ -25,6 +26,15 @@ export default async function HomePage() {
 
   return (
     <div className="page">
+      {liveVote && (
+        <Link href={`/vote/${liveVote.slug}`} className="vote-ribbon">
+          <span className="vote-ribbon__live">
+            <i className="phase__dot" /> {liveVote.phase === 'initial_closed' ? 'Vote in progress' : 'Live vote'}
+          </span>
+          <span className="vote-ribbon__q">{liveVote.resolution}</span>
+          <span className="vote-ribbon__cta">{liveVote.phase === 'initial_closed' ? 'See results →' : 'Cast your vote →'}</span>
+        </Link>
+      )}
       <HeroBanner banner={banner}>
         <AnnouncementCard events={cardEvents} fallback={home.fallbackCard} />
       </HeroBanner>

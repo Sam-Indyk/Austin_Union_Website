@@ -2,7 +2,7 @@
 // Safe to re-run: content rows are upserted by key/slug.
 //
 // Usage: npm run db:seed
-//   ADMIN_EMAILS=a@x.org,b@y.org npm run db:seed   # also grant those people admin
+//   (ADMIN_EMAILS in .env.local grants admin — see below)
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { createClient } from '@supabase/supabase-js';
@@ -116,11 +116,20 @@ for (const e of seed.events) {
 console.log('events:', seed.events.length);
 
 // --- admins -------------------------------------------------------------------
-for (const email of (process.env.ADMIN_EMAILS ?? '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean)) {
-  const person = ok(
-    await db.from('people').upsert({ email, source: 'admin' }, { onConflict: 'email', ignoreDuplicates: false }).select('id').single(),
-    `admin ${email}`,
-  );
-  ok(await db.from('staff').upsert({ person_id: person.id, role: 'admin' }), `staff ${email}`);
-  console.log('admin:', email);
+// ADMIN_EMAILS: people separated by ";", each person's addresses separated by ",".
+// All addresses of one person sign in to the same account, e.g.
+//   ADMIN_EMAILS="sam@austinunion.org,sam@student.uaustin.org;jane@austinunion.org"
+for (const group of (process.env.ADMIN_EMAILS ?? '').split(';')) {
+  const emails = group.split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+  if (!emails.length) continue;
+  const known = ok(await db.from('person_emails').select('person_id, email').in('email', emails), 'person_emails');
+  let personId = known[0]?.person_id as string | undefined;
+  if (!personId) {
+    personId = ok(await db.from('people').insert({ email: emails[0], source: 'admin' }).select('id').single(), 'people').id;
+  }
+  for (const email of emails) {
+    ok(await db.from('person_emails').upsert({ email, person_id: personId }, { onConflict: 'email', ignoreDuplicates: true }), `email ${email}`);
+  }
+  ok(await db.from('staff').upsert({ person_id: personId, role: 'admin' }), 'staff');
+  console.log('admin:', emails.join(' + '));
 }

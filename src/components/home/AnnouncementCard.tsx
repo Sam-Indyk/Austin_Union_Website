@@ -72,7 +72,7 @@ export function AnnouncementCard({ events, fallback }: Props) {
               </a>
               <div className="announce__rule announce__rule--bottom" />
               <p className="announce__date">
-                <Link href="/events-1" style={{ color: 'inherit' }}>
+                <Link href="/events" style={{ color: 'inherit' }}>
                   See past events
                 </Link>
               </p>

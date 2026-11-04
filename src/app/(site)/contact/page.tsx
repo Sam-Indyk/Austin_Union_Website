@@ -37,7 +37,7 @@ export default async function ContactPage() {
                 <SocialLinks links={{ x: settings.social.x }} />
               </div>
             </div>
-            <ContactForm variant="page" page="/contact-8" />
+            <ContactForm variant="page" page="/contact" />
           </div>
         </div>
       </div>
