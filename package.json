@@ -8,14 +8,22 @@
     "start": "next start",
     "lint": "eslint",
     "fonts:fetch": "node scripts/fetch-wix-fonts.mjs",
-    "media:build": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-media.ts"
+    "media:build": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-media.ts",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/seed-db.ts",
+    "db:types": "supabase gen types typescript --local --schema public > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
     "next": "16.4.5",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
-    "sharp": "^0.35.5"
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -23,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
+    "supabase": "^3.0.0",
     "typescript": "^5"
   }
 }

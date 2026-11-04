@@ -1,11 +1,12 @@
 // Write-side storage for things visitors submit: mailing-list sign-ups,
 // messages, and RSVPs.
 //
-// Until Supabase is connected this uses a JSON file in .data/ (development
-// only). The Supabase implementation will satisfy the same interface.
+// Writes go to Supabase when it is configured; otherwise (development only) to a
+// JSON file in .data/.
 import 'server-only';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { check, hasDatabase, serviceClient } from '@/lib/supabase/clients';
 
 export type ContactSource = 'mailing_list' | 'rsvp' | 'message' | 'wix_import' | 'admin';
 
@@ -107,7 +108,49 @@ const devStore: Store = {
   },
 };
 
+// ---------------------------------------------------------------------------
+// Supabase store
+// ---------------------------------------------------------------------------
+const supabaseStore: Store = {
+  async upsertContact(input) {
+    const optIn = !input.subscribe ? 'none' : input.source === 'mailing_list' ? 'explicit' : 'implicit';
+    const rows = check(
+      await serviceClient().rpc('upsert_contact', {
+        p_email: input.email,
+        p_first: input.firstName ?? '',
+        p_last: input.lastName ?? '',
+        p_source: input.source,
+        p_opt_in: optIn,
+      }),
+      'upsert_contact',
+    ) as { person_id: string; created: boolean }[];
+    return { created: rows[0]?.created ?? false };
+  },
+
+  async addMessage(input) {
+    const db = serviceClient();
+    const person = check(await db.from('people').select('id').eq('email', input.email.toLowerCase()).maybeSingle(), 'people');
+    check(await db.from('messages').insert({ ...input, email: input.email.toLowerCase(), person_id: person?.id ?? null }), 'messages.insert');
+  },
+
+  async addRsvp(input) {
+    const db = serviceClient();
+    const email = input.email.toLowerCase();
+    const person = check(await db.from('people').select('id').eq('email', email).maybeSingle(), 'people');
+    const res = await db
+      .from('rsvps')
+      .insert({ event_id: input.eventId, first_name: input.firstName, last_name: input.lastName, email, person_id: person?.id ?? null })
+      .select('id')
+      .maybeSingle();
+    const duplicate = res.error?.code === '23505';
+    if (res.error && !duplicate) throw new Error(`rsvps.insert: ${res.error.message}`);
+    const { count } = await db.from('rsvps').select('id', { count: 'exact', head: true }).eq('event_id', input.eventId).neq('status', 'cancelled');
+    return { duplicate, count: count ?? 0 };
+  },
+};
+
 export function getStore(): Store {
+  if (hasDatabase()) return supabaseStore;
   if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEV_STORE) {
     throw new Error('No database configured. Connect Supabase before deploying.');
   }

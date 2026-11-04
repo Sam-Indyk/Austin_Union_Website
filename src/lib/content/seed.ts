@@ -10,7 +10,7 @@ import type {
   SiteSettings,
   TeamContent,
 } from './types';
-import collageTiles from './collage-seed.json';
+import collageTiles from './collage-seed.json' with { type: 'json' };
 
 export const settings: SiteSettings = {
   siteName: 'Austin Union',

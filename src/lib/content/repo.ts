@@ -6,10 +6,12 @@
 // (upcoming vs. past) use a short lifetime so an event moves to "Past Events"
 // within about a minute of ending, with no manual edit.
 //
-// Today this reads the seed module; the Supabase-backed implementation will
-// replace the bodies of these functions without changing their signatures.
+// Content comes from Supabase when it is configured, otherwise from the seed
+// module (so the site still runs without a database, e.g. for design work).
 import { cacheLife, cacheTag } from 'next/cache';
+import { hasDatabase } from '@/lib/supabase/clients';
 import banner from './collage-banner.json';
+import { dbSource } from './db-source';
 import mediaMeta from './media-meta.json';
 import * as seed from './seed';
 import type { CollageBanner, EventItem, ImageRef } from './types';
@@ -21,11 +23,11 @@ export function blurOf(src: string): string | undefined {
   return META[src]?.blurDataURL;
 }
 
-function withBlur<T extends ImageRef>(img: T): T {
+export function withBlur<T extends ImageRef>(img: T): T {
   return img.blurDataURL ? img : { ...img, blurDataURL: blurOf(img.src) };
 }
 
-function withEventMedia(e: EventItem): EventItem {
+export function withEventMedia(e: EventItem): EventItem {
   return {
     ...e,
     image: withBlur(e.image),
@@ -33,55 +35,59 @@ function withEventMedia(e: EventItem): EventItem {
   };
 }
 
-const EVENTS = seed.events.map(withEventMedia);
+const seedSource = {
+  settings: async () => seed.settings,
+  home: async () => seed.home,
+  mission: async () => seed.mission,
+  donate: async () => seed.donate,
+  contact: async () => seed.contact,
+  collageBanner: async () => banner as CollageBanner,
+  team: async () => ({ ...seed.team, members: seed.team.members.map((m) => ({ ...m, photo: withBlur(m.photo) })) }),
+  events: async () => seed.events.map(withEventMedia),
+};
+
+const source = () => (hasDatabase() ? dbSource : seedSource);
 
 export async function getSettings() {
   'use cache';
   cacheLife('hours');
   cacheTag('settings');
-  return seed.settings;
+  return source().settings();
 }
 
 export async function getHome() {
   'use cache';
   cacheLife('hours');
   cacheTag('home');
-  return seed.home;
+  return source().home();
 }
 
 export async function getMission() {
   'use cache';
   cacheLife('hours');
   cacheTag('mission');
-  return seed.mission;
+  return source().mission();
 }
 
 export async function getTeam() {
   'use cache';
   cacheLife('hours');
   cacheTag('team');
-  return { ...seed.team, members: seed.team.members.map((m) => ({ ...m, photo: withBlur(m.photo) })) };
+  return source().team();
 }
 
 export async function getDonate() {
   'use cache';
   cacheLife('hours');
   cacheTag('donate');
-  return seed.donate;
+  return source().donate();
 }
 
 export async function getContact() {
   'use cache';
   cacheLife('hours');
   cacheTag('contact');
-  return seed.contact;
-}
-
-export async function getCollage() {
-  'use cache';
-  cacheLife('hours');
-  cacheTag('collage');
-  return seed.collage;
+  return source().contact();
 }
 
 /** The composed banner image built from the collage photos. */
@@ -89,7 +95,14 @@ export async function getCollageBanner(): Promise<CollageBanner> {
   'use cache';
   cacheLife('hours');
   cacheTag('collage');
-  return banner;
+  return source().collageBanner();
+}
+
+async function allEvents() {
+  'use cache';
+  cacheLife('minutes');
+  cacheTag('events');
+  return source().events();
 }
 
 function isVisible(e: EventItem, now: number) {
@@ -114,11 +127,11 @@ export async function getEventTimeline(): Promise<EventTimeline> {
   cacheLife('minutes');
   cacheTag('events');
   const now = Date.now();
-  const visible = EVENTS.filter((e) => isVisible(e, now));
-  const upcoming = visible
+  const listed = (await allEvents()).filter((e) => isVisible(e, now) && e.visibility !== 'unlisted' && e.visibility !== 'members');
+  const upcoming = listed
     .filter((e) => Date.parse(e.endsAt) > now && e.status !== 'cancelled')
     .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
-  const past = visible
+  const past = listed
     .filter((e) => Date.parse(e.endsAt) <= now && e.status !== 'cancelled')
     .sort((a, b) => Date.parse(b.startsAt) - Date.parse(a.startsAt));
   return { upcoming, past, featured: upcoming.filter((e) => e.featureOnHome), asOf: now };
@@ -129,7 +142,7 @@ export async function getEventBySlug(slug: string) {
   cacheLife('minutes');
   cacheTag('events', `event:${slug}`);
   const now = Date.now();
-  const event = EVENTS.find((e) => e.slug === slug && isVisible(e, now));
+  const event = (await allEvents()).find((e) => e.slug === slug && isVisible(e, now));
   if (!event) return null;
   const isPast = Date.parse(event.endsAt) <= now;
   const acceptingRsvps =
@@ -141,5 +154,5 @@ export async function getAllEventSlugs() {
   'use cache';
   cacheLife('minutes');
   cacheTag('events');
-  return EVENTS.filter((e) => e.status !== 'draft').map((e) => e.slug);
+  return (await allEvents()).filter((e) => e.status !== 'draft').map((e) => e.slug);
 }

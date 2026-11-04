@@ -141,6 +141,8 @@ export interface EventItem {
   id: string;
   slug: string;
   status: EventStatus;
+  /** 'unlisted' events are reachable by link but not listed; 'members' need a login. */
+  visibility?: 'public' | 'members' | 'unlisted';
   /** If set, the event stays hidden until this moment (scheduled publishing). */
   publishAt?: string;
   title: string;

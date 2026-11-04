@@ -11,21 +11,53 @@ out automatically.
 desktop width (within a few pixels) and with a cleaner phone layout. Content is read
 from `src/lib/content/seed.ts` through `src/lib/content/repo.ts`.
 
-Forms (mailing list, RSVPs, the "Let's Chat!" box, contact forms) work locally and
-save to `.data/dev-db.json`. They refuse to run in production until the database is
-connected.
+**Phase 2 — database (in progress).** Local Supabase with the full schema; the site
+reads content from it and forms (mailing list, RSVPs, contact) write to it.
 
-**Next:** Supabase (database, logins, photo storage), the admin edit mode,
-announcement and reminder emails, the Wix contact import, Swoogo registration for
-UATX events, member accounts, votes, and members-only pages.
+**Next:** sign-in (Google for @uaustin.org + email links), the admin edit mode,
+votes, members and members-only pages, announcement/reminder emails, the Wix
+contact import, Swoogo registration for UATX events.
 
 ## Running it
 
 ```bash
 npm install
 npm run fonts:fetch   # licensed display fonts; not committed
+npm run db:start      # local Supabase in Docker (first run downloads ~10 GB of images)
+cp .env.example .env.local   # then paste the keys `npm run db:start` printed
+npm run db:reset && npm run db:seed   # schema + the content from the Wix site
 npm run dev           # http://localhost:3000
 ```
+
+Without `.env.local` the site still runs, serving the built-in seed content and
+saving form submissions to `.data/dev-db.json`.
+
+Local services: Supabase Studio (browse/edit tables) at http://127.0.0.1:54323,
+and Mailpit (catches every email the local site sends, e.g. sign-in links) at
+http://127.0.0.1:54324.
+
+`ADMIN_EMAILS=you@example.org npm run db:seed` makes those people admins.
+
+## Database
+
+The schema is in `supabase/migrations/`. Highlights:
+
+- **people** — one row per human: subscribers, RSVP guests, members, voters, staff.
+  Sign-ins are linked by email; signing in with an @uaustin.org address verifies it.
+- **memberships** — a person can hold several at once: `voting` (UATX students),
+  `associate` (paid/outside), `honorary` (past leadership, speakers, alumni).
+  Leaving the Team page grants honorary membership automatically; voting
+  membership ends on June 1 of the class year and the member becomes honorary
+  alumni (daily job).
+- **events / rsvps** — with members-only visibility, capacity, check-in, and
+  partner (Swoogo) registration status.
+- **votes / vote_options / ballots** — single-round or initial-and-final
+  ("swing") votes, configurable eligibility, result visibility and anonymity.
+- **messages**, **member_pages**, **email_campaigns / email_sends**, **site_content**.
+
+Row level security is on for every table. Public pages read with the anon key;
+visitor submissions are written by the server with the service role after
+validation; admin screens act as the signed-in user.
 
 ## Where things live
 
@@ -39,7 +71,10 @@ npm run dev           # http://localhost:3000
 | `src/lib/collage-render.ts` | Composes those photos into one banner image + blurred preview. |
 | `scripts/build-media.ts` | `npm run media:build` — rebuilds the seed banner and image previews. |
 | `src/app/actions.ts` | Form handlers (sign-up, message, RSVP). |
-| `src/lib/store/` | Where submissions are saved (a local file until Supabase). |
+| `src/lib/store/` | Where submissions are saved (Supabase, or a local file without it). |
+| `src/lib/supabase/` | Supabase clients and generated database types (`npm run db:types`). |
+| `supabase/` | Local Supabase config and SQL migrations. |
+| `scripts/seed-db.ts` | `npm run db:seed` — loads the Wix content into the database. |
 | `scripts/import-wix-media.mjs` | One-off copy of the Wix images into `public/media`. |
 
 ## How events behave
