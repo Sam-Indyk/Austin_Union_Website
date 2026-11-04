@@ -9,8 +9,31 @@
 // Today this reads the seed module; the Supabase-backed implementation will
 // replace the bodies of these functions without changing their signatures.
 import { cacheLife, cacheTag } from 'next/cache';
+import banner from './collage-banner.json';
+import mediaMeta from './media-meta.json';
 import * as seed from './seed';
-import type { EventItem } from './types';
+import type { CollageBanner, EventItem, ImageRef } from './types';
+
+const META = mediaMeta as Record<string, { width: number; height: number; blurDataURL: string }>;
+
+/** Blurred preview for a static image under /public/media, if one was generated. */
+export function blurOf(src: string): string | undefined {
+  return META[src]?.blurDataURL;
+}
+
+function withBlur<T extends ImageRef>(img: T): T {
+  return img.blurDataURL ? img : { ...img, blurDataURL: blurOf(img.src) };
+}
+
+function withEventMedia(e: EventItem): EventItem {
+  return {
+    ...e,
+    image: withBlur(e.image),
+    recap: e.recap && { ...e.recap, photos: e.recap.photos.map(withBlur) },
+  };
+}
+
+const EVENTS = seed.events.map(withEventMedia);
 
 export async function getSettings() {
   'use cache';
@@ -37,7 +60,7 @@ export async function getTeam() {
   'use cache';
   cacheLife('hours');
   cacheTag('team');
-  return seed.team;
+  return { ...seed.team, members: seed.team.members.map((m) => ({ ...m, photo: withBlur(m.photo) })) };
 }
 
 export async function getDonate() {
@@ -59,6 +82,14 @@ export async function getCollage() {
   cacheLife('hours');
   cacheTag('collage');
   return seed.collage;
+}
+
+/** The composed banner image built from the collage photos. */
+export async function getCollageBanner(): Promise<CollageBanner> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('collage');
+  return banner;
 }
 
 function isVisible(e: EventItem, now: number) {
@@ -83,7 +114,7 @@ export async function getEventTimeline(): Promise<EventTimeline> {
   cacheLife('minutes');
   cacheTag('events');
   const now = Date.now();
-  const visible = seed.events.filter((e) => isVisible(e, now));
+  const visible = EVENTS.filter((e) => isVisible(e, now));
   const upcoming = visible
     .filter((e) => Date.parse(e.endsAt) > now && e.status !== 'cancelled')
     .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
@@ -98,7 +129,7 @@ export async function getEventBySlug(slug: string) {
   cacheLife('minutes');
   cacheTag('events', `event:${slug}`);
   const now = Date.now();
-  const event = seed.events.find((e) => e.slug === slug && isVisible(e, now));
+  const event = EVENTS.find((e) => e.slug === slug && isVisible(e, now));
   if (!event) return null;
   const isPast = Date.parse(event.endsAt) <= now;
   const acceptingRsvps =
@@ -110,5 +141,5 @@ export async function getAllEventSlugs() {
   'use cache';
   cacheLife('minutes');
   cacheTag('events');
-  return seed.events.filter((e) => e.status !== 'draft').map((e) => e.slug);
+  return EVENTS.filter((e) => e.status !== 'draft').map((e) => e.slug);
 }

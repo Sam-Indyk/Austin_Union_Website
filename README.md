@@ -23,8 +23,8 @@ UATX events, member accounts, votes, and members-only pages.
 
 ```bash
 npm install
-node scripts/fetch-wix-fonts.mjs   # licensed display fonts; not committed
-npm run dev                        # http://localhost:3000
+npm run fonts:fetch   # licensed display fonts; not committed
+npm run dev           # http://localhost:3000
 ```
 
 ## Where things live
@@ -36,6 +36,8 @@ npm run dev                        # http://localhost:3000
 | `src/lib/content/seed.ts` | Content transcribed from the Wix site. |
 | `src/lib/content/repo.ts` | All reads. Cached; event data refreshes every minute. |
 | `src/lib/collage-layout.ts` | Arranges the homepage banner photos automatically. |
+| `src/lib/collage-render.ts` | Composes those photos into one banner image + blurred preview. |
+| `scripts/build-media.ts` | `npm run media:build` — rebuilds the seed banner and image previews. |
 | `src/app/actions.ts` | Form handlers (sign-up, message, RSVP). |
 | `src/lib/store/` | Where submissions are saved (a local file until Supabase). |
 | `scripts/import-wix-media.mjs` | One-off copy of the Wix images into `public/media`. |

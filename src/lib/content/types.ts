@@ -15,6 +15,8 @@ export interface ImageRef {
   /** Focal point (0–100) used for object-position when the image is cropped. */
   focalX?: number;
   focalY?: number;
+  /** Tiny blurred preview shown while the image loads (generated on upload). */
+  blurDataURL?: string;
 }
 
 export interface SocialLinks {
@@ -45,7 +47,8 @@ export interface HomeContent {
   fallbackCard: { title: string; subtitle: string; linkLabel: string; linkHref: string };
 }
 
-export type SectionTheme = 'red' | 'cream' | 'navy' | 'charcoal';
+/** Section colour schemes. 'navy' is kept available but no longer used by default. */
+export type SectionTheme = 'red' | 'cream' | 'maroon' | 'charcoal' | 'navy';
 export type OrnamentColor = 'gold' | 'red';
 
 export interface MissionSection {
@@ -100,6 +103,14 @@ export interface CollagePhoto {
   height: number;
   focalX?: number;
   focalY?: number;
+  /** Relative size in the mosaic (1 = normal). */
+  emphasis?: number;
+}
+
+/** The composed banner image (regenerated whenever the collage photos change). */
+export interface CollageBanner {
+  desktop: { src: string; width: number; height: number; blurDataURL: string };
+  mobile: { src: string; width: number; height: number; blurDataURL: string };
 }
 
 /** How RSVPs are handled for an event. */

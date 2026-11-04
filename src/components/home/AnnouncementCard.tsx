@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { Ornament } from '@/components/Ornament';
 import { useNow } from '@/lib/use-now';
 
 export interface CardEvent {
@@ -48,42 +49,36 @@ export function AnnouncementCard({ events, fallback }: Props) {
           <Image src="/media/site/seal.png" alt="" width={82} height={82} preload />
         </Link>
         <div className="announce__rule" />
-        {event ? (
-          <>
-            <div className="announce__title-row">
-              <span className="announce__hand" aria-hidden="true">
-                #
-              </span>
-              <h2 className="announce__title">{event.title}</h2>
-            </div>
-            {event.subtitle && <p className="announce__subtitle">{event.subtitle}</p>}
-            {!event.subtitle && <div style={{ height: 16 }} />}
-            <Link className="announce__cta" href={`/events/${event.slug}#rsvp`}>
-              RSVP HERE
-            </Link>
-            <div className="announce__rule announce__rule--bottom" />
-            <p className="announce__date">{event.dateLabel}</p>
-          </>
-        ) : (
-          <>
-            <div className="announce__title-row">
-              <span className="announce__hand" aria-hidden="true">
-                #
-              </span>
-              <h2 className="announce__title">{fallback.title}</h2>
-            </div>
-            <p className="announce__subtitle">{fallback.subtitle}</p>
-            <a className="announce__cta" href={fallback.linkHref}>
-              {fallback.linkLabel}
-            </a>
-            <div className="announce__rule announce__rule--bottom" />
-            <p className="announce__date">
-              <Link href="/events-1" style={{ color: 'inherit' }}>
-                See past events
+        {/* Keyed so that rotating between events cross-fades the text. */}
+        <div className="announce__body" key={event?.slug ?? 'fallback'}>
+          <div className="announce__title-row">
+            <Ornament name="hand" className="announce__hand" />
+            <h2 className="announce__title">{event ? event.title : fallback.title}</h2>
+          </div>
+          {event ? (
+            <>
+              {event.subtitle ? <p className="announce__subtitle">{event.subtitle}</p> : <div style={{ height: 16 }} />}
+              <Link className="announce__cta" href={`/events/${event.slug}#rsvp`}>
+                RSVP HERE
               </Link>
-            </p>
-          </>
-        )}
+              <div className="announce__rule announce__rule--bottom" />
+              <p className="announce__date">{event.dateLabel}</p>
+            </>
+          ) : (
+            <>
+              <p className="announce__subtitle">{fallback.subtitle}</p>
+              <a className="announce__cta" href={fallback.linkHref}>
+                {fallback.linkLabel}
+              </a>
+              <div className="announce__rule announce__rule--bottom" />
+              <p className="announce__date">
+                <Link href="/events-1" style={{ color: 'inherit' }}>
+                  See past events
+                </Link>
+              </p>
+            </>
+          )}
+        </div>
         {live.length > 1 && (
           <div className="announce__dots">
             {live.map((e, i) => (

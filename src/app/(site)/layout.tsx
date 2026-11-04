@@ -1,16 +1,18 @@
+import { ViewTransition } from 'react';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
-import { ChatWidget } from '@/components/forms/ChatWidget';
 
 export default function SiteLayout({ children }: LayoutProps<'/'>) {
   return (
     <>
       <SiteHeader />
-      <main id="main" tabIndex={-1}>
-        {children}
-      </main>
+      {/* Page changes cross-fade (and event photos morph between list and detail). */}
+      <ViewTransition>
+        <main id="main" tabIndex={-1}>
+          {children}
+        </main>
+      </ViewTransition>
       <SiteFooter />
-      <ChatWidget />
     </>
   );
 }

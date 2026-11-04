@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, ViewTransition } from 'react';
 import { RsvpButton } from '@/components/events/RsvpDialog';
 import { RichText } from '@/components/RichText';
 import { FacebookIcon, LinkedInIcon, XIcon } from '@/components/icons';
@@ -81,16 +81,19 @@ async function EventContent({ params }: Pick<PageProps<'/events/[slug]'>, 'param
             ) : null)}
         </div>
 
-        <div className="event-hero">
-          <Image
-            src={e.image.src}
-            alt={e.image.alt}
-            fill
-            preload
-            sizes="(max-width: 868px) 100vw, 828px"
-            style={{ objectPosition: `${e.image.focalX ?? 50}% ${e.image.focalY ?? 50}%` }}
-          />
-        </div>
+        <ViewTransition name={`event-image-${e.slug}`} share="morph" default="none">
+          <div className="event-hero">
+            <Image
+              src={e.image.src}
+              alt={e.image.alt}
+              fill
+              preload
+              sizes="(max-width: 868px) 100vw, 828px"
+              style={{ objectPosition: `${e.image.focalX ?? 50}% ${e.image.focalY ?? 50}%` }}
+              {...(e.image.blurDataURL ? { placeholder: 'blur' as const, blurDataURL: e.image.blurDataURL } : {})}
+            />
+          </div>
+        </ViewTransition>
 
         <section className="event-section">
           <h2>Time &amp; Location</h2>
@@ -133,7 +136,13 @@ async function EventContent({ params }: Pick<PageProps<'/events/[slug]'>, 'param
               <ul className="recap-gallery">
                 {e.recap.photos.map((p) => (
                   <li key={p.src}>
-                    <Image src={p.src} alt={p.alt} fill sizes="(max-width: 868px) 50vw, 280px" />
+                    <Image
+                      src={p.src}
+                      alt={p.alt}
+                      fill
+                      sizes="(max-width: 868px) 50vw, 280px"
+                      {...(p.blurDataURL ? { placeholder: 'blur' as const, blurDataURL: p.blurDataURL } : {})}
+                    />
                   </li>
                 ))}
               </ul>

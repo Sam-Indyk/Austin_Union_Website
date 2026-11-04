@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import { AnnouncementCard, type CardEvent } from '@/components/home/AnnouncementCard';
-import { HeroCollage } from '@/components/home/HeroCollage';
+import { HeroBanner } from '@/components/home/HeroBanner';
 import { MailingListForm } from '@/components/forms/MailingListForm';
-import { getCollage, getEventTimeline, getHome } from '@/lib/content/repo';
+import { blurOf, getCollageBanner, getEventTimeline, getHome } from '@/lib/content/repo';
 import { formatCardDate } from '@/lib/dates';
 
 /** Wrap the first word of the essay in the red drop cap ("The"). */
@@ -11,7 +11,7 @@ function withDropCap(html: string) {
 }
 
 export default async function HomePage() {
-  const [home, collage, timeline] = await Promise.all([getHome(), getCollage(), getEventTimeline()]);
+  const [home, banner, timeline] = await Promise.all([getHome(), getCollageBanner(), getEventTimeline()]);
 
   const cardEvents: CardEvent[] = timeline.featured.map((e) => ({
     slug: e.slug,
@@ -21,11 +21,13 @@ export default async function HomePage() {
     endsAt: e.endsAt,
   }));
 
+  const stripBlur = blurOf('/media/site/photo-strip.jpg');
+
   return (
     <div className="page">
-      <HeroCollage photos={collage}>
+      <HeroBanner banner={banner}>
         <AnnouncementCard events={cardEvents} fallback={home.fallbackCard} />
-      </HeroCollage>
+      </HeroBanner>
 
       <section className="essay-section">
         <div className="container">
@@ -42,7 +44,13 @@ export default async function HomePage() {
       </section>
 
       <div className="photo-strip">
-        <Image src="/media/site/photo-strip.jpg" alt="" fill sizes="100vw" />
+        <Image
+          src="/media/site/photo-strip.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          {...(stripBlur ? { placeholder: 'blur' as const, blurDataURL: stripBlur } : {})}
+        />
       </div>
 
       <MailingListForm />

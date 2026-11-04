@@ -2,141 +2,169 @@
  {
   "src": "/media/collage/collage-a.jpg",
   "width": 792,
-  "height": 516
+  "height": 516,
+  "emphasis": 1.23
  },
  {
   "src": "/media/collage/collage-b.jpg",
   "width": 390,
-  "height": 507
+  "height": 507,
+  "emphasis": 0.8
  },
  {
   "src": "/media/collage/collage-c.jpg",
   "width": 405,
-  "height": 507
+  "height": 507,
+  "emphasis": 0.81
  },
  {
   "src": "/media/collage/collage-d.jpg",
   "width": 249,
-  "height": 207
+  "height": 207,
+  "emphasis": 0.6
  },
  {
   "src": "/media/collage/collage-d2.jpg",
   "width": 340,
-  "height": 207
+  "height": 207,
+  "emphasis": 0.6
  },
  {
   "src": "/media/collage/collage-e.jpg",
   "width": 607,
-  "height": 351
+  "height": 351,
+  "emphasis": 0.83
  },
  {
   "src": "/media/collage/collage-f.jpg",
   "width": 607,
-  "height": 483
+  "height": 483,
+  "emphasis": 1.01
  },
  {
   "src": "/media/collage/collage-g.jpg",
   "width": 402,
-  "height": 450
+  "height": 450,
+  "emphasis": 0.75
  },
  {
   "src": "/media/collage/collage-h.jpg",
   "width": 402,
-  "height": 609
+  "height": 609,
+  "emphasis": 0.9
  },
  {
   "src": "/media/collage/collage-i.jpg",
   "width": 444,
-  "height": 288
+  "height": 288,
+  "emphasis": 0.61
  },
  {
   "src": "/media/collage/collage-j.jpg",
   "width": 444,
-  "height": 771
+  "height": 771,
+  "emphasis": 1.11
  },
  {
   "src": "/media/collage/collage-k.jpg",
   "width": 1107,
-  "height": 681
+  "height": 681,
+  "emphasis": 1.78
  },
  {
   "src": "/media/collage/collage-l.jpg",
   "width": 675,
-  "height": 1002
+  "height": 1002,
+  "emphasis": 1.67
  },
  {
   "src": "/media/collage/collage-m.jpg",
   "width": 414,
-  "height": 633
+  "height": 633,
+  "emphasis": 0.94
  },
  {
   "src": "/media/collage/collage-n.jpg",
   "width": 414,
-  "height": 351
+  "height": 351,
+  "emphasis": 0.66
  },
  {
   "src": "/media/collage/collage-o.jpg",
   "width": 792,
-  "height": 594
+  "height": 594,
+  "emphasis": 1.34
  },
  {
   "src": "/media/collage/collage-p.jpg",
   "width": 813,
-  "height": 603
+  "height": 603,
+  "emphasis": 1.37
  },
  {
   "src": "/media/collage/collage-q.jpg",
   "width": 1116,
-  "height": 786
+  "height": 786,
+  "emphasis": 1.95
  },
  {
   "src": "/media/collage/collage-r.jpg",
   "width": 489,
-  "height": 555
+  "height": 555,
+  "emphasis": 0.96
  },
  {
   "src": "/media/collage/collage-s.jpg",
   "width": 862,
-  "height": 606
+  "height": 606,
+  "emphasis": 1.43
  },
  {
   "src": "/media/collage/collage-t.jpg",
   "width": 609,
-  "height": 606
+  "height": 606,
+  "emphasis": 1.16
  },
  {
   "src": "/media/collage/collage-u.jpg",
   "width": 282,
-  "height": 213
+  "height": 213,
+  "emphasis": 0.6
  },
  {
   "src": "/media/collage/collage-v.jpg",
   "width": 564,
-  "height": 663
+  "height": 663,
+  "emphasis": 1.17
  },
  {
   "src": "/media/collage/collage-w.jpg",
   "width": 937,
-  "height": 663
+  "height": 663,
+  "emphasis": 1.58
  },
  {
   "src": "/media/collage/collage-x.jpg",
   "width": 1002,
-  "height": 663
+  "height": 663,
+  "emphasis": 1.65
  },
  {
   "src": "/media/collage/collage-y.jpg",
   "width": 264,
-  "height": 663
+  "height": 663,
+  "emphasis": 0.74
  },
  {
   "src": "/media/collage/collage-z.jpg",
   "width": 738,
-  "height": 432
+  "height": 432,
+  "emphasis": 1.06
  },
  {
   "src": "/media/collage/collage-z2.jpg",
   "width": 660,
-  "height": 432
+  "height": 432,
+  "emphasis": 0.99
  }
 ]

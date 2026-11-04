@@ -4,7 +4,9 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   images: {
-    qualities: [75, 85],
+    // AVIF is ~30-50% smaller than WebP for photos; browsers without it get WebP.
+    formats: ['image/avif', 'image/webp'],
+    qualities: [70, 75, 85],
   },
   // The Wix URLs (/events-1, /about-4, /contact-8) are kept so existing links keep
   // working; these friendlier aliases point at them.

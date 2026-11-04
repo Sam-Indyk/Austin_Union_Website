@@ -4,32 +4,24 @@
    column is 980px wide (Wix's classic grid); full-bleed sections span the page.
    ========================================================================== */
 
-/* Licensed display fonts (Walden Font Co.). Files live in /public/fonts and are
+/* Licensed display font (Walden Font Co.). Files live in /public/fonts and are
    not committed until the web license is confirmed; the fallback stack keeps
-   the site readable without them. */
+   the site readable without them. They are preloaded in the root layout, and
+   'fallback' gives them a brief moment to arrive before any text is drawn, so
+   headings don't visibly swap faces. Ornaments are inline SVG (Ornament.tsx). */
 @font-face {
   font-family: 'Neue Ohio Schrift';
   src: url('/fonts/neue-ohio-schrift.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: fallback;
 }
 @font-face {
   font-family: 'Neue Ohio Schrift Italic';
   src: url('/fonts/neue-ohio-schrift-italic.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Kraftwerk Vignetten';
-  src: url('/fonts/kraftwerk-vignetten.woff2') format('woff2');
-  font-display: block;
-}
-@font-face {
-  font-family: 'Colonial Bullets';
-  src: url('/fonts/colonial-bullets.woff2') format('woff2');
-  font-display: block;
+  font-display: fallback;
 }
 
 :root {
@@ -38,6 +30,7 @@
   --gray: #605e5e;
   --pink: #f7b3b3;
   --cream: #ededE4;
+  /* Kept for future use; no longer used on the Mission page. */
   --navy: #324158;
   --charcoal: #2f2e2e;
   --maroon: #401718;
@@ -52,8 +45,6 @@
   --font-display: 'Neue Ohio Schrift', var(--font-garamond), Georgia, serif;
   --font-display-italic: 'Neue Ohio Schrift Italic', var(--font-garamond), Georgia, serif;
   --font-ui: var(--font-sans), 'Avenir Next', Avenir, 'Helvetica Neue', Arial, sans-serif;
-  --font-ornament: 'Colonial Bullets';
-  --font-vignette: 'Kraftwerk Vignetten';
 
   --content: 980px;
   --header-h: 54px;
@@ -68,6 +59,12 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: calc(var(--header-h) + 12px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -144,11 +141,9 @@ select {
 }
 
 .ornament {
-  font-family: var(--font-ornament);
-  font-weight: 400;
-  font-style: normal;
-  line-height: 1;
-  speak: never;
+  display: inline-block;
+  flex: none;
+  overflow: visible;
 }
 
 /* --------------------------------------------------------------------------
@@ -252,28 +247,29 @@ select {
   position: relative;
   height: 715px;
   overflow: hidden;
-  background: #222;
+  background: #3a3a3a;
 }
 
-.collage {
+/* Blurred preview: visible instantly, then covered by the real banner. */
+.hero__blur {
+  position: absolute;
+  inset: -40px;
+  background: var(--blur-desktop) center / cover no-repeat;
+  filter: blur(24px);
+}
+
+.hero__img {
   position: absolute;
   inset: 0;
-}
-
-.collage--mobile {
-  display: none;
-}
-
-.collage__tile {
-  position: absolute;
-  overflow: hidden;
-}
-
-.collage__tile img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.hero__img.is-loaded {
+  opacity: 1;
 }
 
 .announce {
@@ -283,6 +279,7 @@ select {
   left: 50%;
   width: 436px;
   transform: translateX(-50%);
+  animation: announce-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both;
   /* Wix "double border" box: 3px ink, 5px pink, 1px gray, then red fill. */
   border: 3px solid var(--ink);
   background: var(--pink);
@@ -315,6 +312,34 @@ select {
   height: 82px;
 }
 
+@keyframes announce-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.announce__body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fade-in 0.45s ease both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .announce__rule {
   width: 182px;
   height: 0;
@@ -333,10 +358,7 @@ select {
   position: absolute;
   left: 7px;
   top: 22px;
-  font-family: var(--font-vignette);
   font-size: 32px;
-  line-height: 1;
-  letter-spacing: 0.1em;
   color: var(--white);
 }
 
@@ -1055,6 +1077,21 @@ select {
   background: rgba(20, 10, 10, 0.55);
 }
 
+.rsvp-dialog[open] {
+  animation: dialog-in 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.rsvp-dialog[open]::backdrop {
+  animation: fade-in 0.22s ease;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
 .rsvp-dialog__head {
   background: var(--red);
   color: var(--white);
@@ -1175,7 +1212,7 @@ select {
    Mission (/about-4)
    -------------------------------------------------------------------------- */
 .mission-head {
-  background: var(--navy);
+  background: var(--maroon);
   padding: 47px 0 53px;
 }
 
@@ -1250,6 +1287,10 @@ select {
 }
 .theme-cream h2 {
   color: var(--ink);
+}
+.theme-maroon {
+  background: var(--maroon);
+  color: var(--cream);
 }
 .theme-navy {
   background: var(--navy);
@@ -1390,7 +1431,7 @@ select {
 .team-intro {
   width: 672px;
   max-width: calc(100% - 40px);
-  margin: 56px auto 0;
+  margin: 51px auto 0;
   font-family: var(--font-body);
   font-size: 18px;
   line-height: 32.4px;
@@ -1678,105 +1719,15 @@ select {
 }
 
 /* --------------------------------------------------------------------------
-   "Let's Chat!" message box (replaces the Wix chat widget)
-   -------------------------------------------------------------------------- */
-.chat-launcher {
-  position: fixed;
-  right: 20px;
-  bottom: 0;
-  z-index: 60;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 200px;
-  height: 56px;
-  padding: 0 0 0 38px;
-  border: 0;
-  border-radius: 6px 6px 0 0;
-  background: var(--red);
-  color: var(--white);
-  font-family: var(--font-display);
-  font-size: 18px;
-  cursor: pointer;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
-}
-
-.chat-launcher svg {
-  width: 26px;
-  height: 26px;
-}
-
-.chat-panel {
-  position: fixed;
-  right: 20px;
-  bottom: 0;
-  z-index: 61;
-  width: 340px;
-  max-width: calc(100vw - 24px);
-  background: var(--white);
-  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
-  border-radius: 6px 6px 0 0;
-  overflow: hidden;
-}
-
-.chat-panel__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--red);
-  color: var(--white);
-  padding: 14px 16px;
-  font-family: var(--font-display);
-  font-size: 20px;
-}
-
-.chat-panel__head button {
-  border: 0;
-  background: none;
-  color: var(--white);
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.chat-panel__body {
-  padding: 16px;
-}
-
-.chat-panel__body p {
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.45;
-  color: var(--gray);
-  margin-bottom: 14px;
-}
-
-.chat-panel .form-grid {
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-.chat-panel .form-grid label {
-  font-size: 13px;
-  margin-bottom: 6px;
-}
-
-.chat-panel .form-grid input {
-  height: 36px;
-}
-
-.chat-panel .form-grid textarea {
-  height: 96px;
-}
-
-.chat-panel .form-actions .btn {
-  width: 100%;
-}
-
-/* --------------------------------------------------------------------------
    Responsive — Wix serves a separate 320px mobile layout; this is the
    equivalent, without its overlapping text.
    -------------------------------------------------------------------------- */
+@media (max-width: 1375px) {
+  .team-grid {
+    grid-template-columns: minmax(0, 648px);
+  }
+}
+
 @media (max-width: 1100px) {
   .site-footer .social {
     left: auto;
@@ -1785,9 +1736,6 @@ select {
   .site-footer__copy {
     font-size: 17px;
     padding: 0 150px 0 20px;
-  }
-  .team-grid {
-    grid-template-columns: minmax(0, 648px);
   }
   .upcoming-card {
     grid-template-columns: 1fr;
@@ -1878,6 +1826,7 @@ select {
   }
 
   .mobile-menu {
+    animation: fade-in 0.18s ease;
     display: flex;
     position: fixed;
     inset: var(--header-h) 0 0 0;
@@ -1909,17 +1858,14 @@ select {
     height: 640px;
   }
 
-  .collage--desktop {
-    display: none;
-  }
-
-  .collage--mobile {
-    display: block;
+  .hero__blur {
+    background-image: var(--blur-mobile);
   }
 
   .announce {
     top: 50%;
     transform: translate(-50%, -50%);
+    animation-name: fade-in;
     width: calc(100% - 40px);
     max-width: 380px;
   }
@@ -2187,24 +2133,31 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .chat-launcher {
-    width: 56px;
-    height: 56px;
-    right: 14px;
-    bottom: 14px;
-    padding: 0;
-    justify-content: center;
-    border-radius: 50%;
-  }
+}
 
-  .chat-launcher span {
-    display: none;
-  }
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 0.22s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+::view-transition-group(.morph) {
+  animation-duration: 0.38s;
+}
+
+.site-header {
+  view-transition-name: site-header;
 }
 
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
+    animation: none !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
     animation: none !important;
   }
 }

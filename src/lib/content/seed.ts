@@ -78,7 +78,7 @@ export const mission: MissionContent = {
       heading: 'A Renewed Vision',
       ornament: '&',
       ornamentColor: 'gold',
-      theme: 'navy',
+      theme: 'maroon',
       body:
         '<p>We aim to break this destructive cycle, and reassert the institution of debate as a higher way. To catch flame in the modern era, however, we are bringing the conversation into the eye of the storm: Austin. The spirit of innovation must be brought to our schools of debate, leading us beyond parliamentary exercises; likewise, the unbounded progress of our age must be tempered by careful and cogent conversation.</p>' +
         "<p>We're not kidding ourselves -- establishing a debate society with ambitions to 'take back the zeitgeist' is an underdog's gambit, to be blunt.</p>",
@@ -114,8 +114,7 @@ export const team: TeamContent = {
     { id: 'francesca-naugle', name: 'Francesca Naugle', role: 'Prefect', email: 'francesca@austinunion.org', photo: { src: '/media/team/francesca-naugle.jpg', alt: 'Francesca Naugle', focalX: 35, focalY: 50 } },
     { id: 'luke-bradley', name: 'Luke Bradley', role: 'Parliamentarian', email: 'luke@austinunion.org', photo: { src: '/media/team/luke-bradley.jpg', alt: 'Luke Bradley' } },
     { id: 'analina-naugle', name: 'Analina Naugle', role: 'Events Coordinator', email: 'analina@austinunion.org', photo: { src: '/media/team/analina-naugle.jpg', alt: 'Analina Naugle' } },
-    // Spelled "Fortinksy" on the Wix page; likely a typo — confirm before launch.
-    { id: 'benjamin-fortinsky', name: 'Benjamin Fortinksy', role: 'Ambassador', email: 'benjamin@austinunion.org', photo: { src: '/media/team/benjamin-fortinsky.jpg', alt: 'Benjamin Fortinksy' } },
+    { id: 'benjamin-fortinsky', name: 'Benjamin Fortinsky', role: 'Ambassador', email: 'benjamin@austinunion.org', photo: { src: '/media/team/benjamin-fortinsky.jpg', alt: 'Benjamin Fortinsky' } },
   ],
 };
 

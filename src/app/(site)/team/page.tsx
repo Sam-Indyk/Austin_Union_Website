@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { CircleBadge, LinkedInIcon, XIcon } from '@/components/icons';
+import { Ornament } from '@/components/Ornament';
 import { RichText } from '@/components/RichText';
 import { getTeam } from '@/lib/content/repo';
 
@@ -13,13 +14,9 @@ export default async function TeamPage() {
       <header className="team-head">
         <h1>{team.title}</h1>
         <p className="team-head__motto">
-          <span className="ornament" aria-hidden="true">
-            B
-          </span>
+          <Ornament name="scroll" />
           {team.motto}
-          <span className="ornament ornament--flip" aria-hidden="true">
-            B
-          </span>
+          <Ornament name="scroll" className="ornament--flip" />
         </p>
       </header>
       <RichText html={team.intro} className="team-intro" />
@@ -33,6 +30,7 @@ export default async function TeamPage() {
                 fill
                 sizes="(max-width: 760px) 100vw, 344px"
                 loading={i < 2 ? 'eager' : 'lazy'}
+                {...(m.photo.blurDataURL ? { placeholder: 'blur' as const, blurDataURL: m.photo.blurDataURL } : {})}
                 style={{ objectPosition: `${m.photo.focalX ?? 50}% ${m.photo.focalY ?? 50}%` }}
               />
             </div>

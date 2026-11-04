@@ -13,6 +13,8 @@ export interface LayoutPhoto {
   id: string;
   width: number;
   height: number;
+  /** Relative size in the mosaic (1 = normal; 2 ≈ twice the area). */
+  emphasis?: number;
 }
 
 export interface Tile {
@@ -48,10 +50,10 @@ function tileCost(photo: LayoutPhoto, w: number, h: number, frameArea: number): 
   return (distortion + sliver) * (0.35 + areaShare * 6) + (distortion > 0.85 ? 0.4 : 0);
 }
 
-/** Area weight for a photo: landscape photos get a little more room than portraits. */
+/** Area weight for a photo: its emphasis, with landscape photos getting a little more room than portraits. */
 function weight(p: LayoutPhoto): number {
   const a = p.width / p.height;
-  return Math.sqrt(Math.min(Math.max(a, 0.5), 2.2));
+  return (p.emphasis ?? 1) * Math.sqrt(Math.min(Math.max(a, 0.5), 2.2));
 }
 
 function solve(photos: LayoutPhoto[], start: number, end: number, w: number, h: number, frameArea: number, memo: Map<string, Result>): Result {

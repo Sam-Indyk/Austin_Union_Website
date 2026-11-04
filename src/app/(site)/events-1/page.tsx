@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ViewTransition } from 'react';
 import { PastEventCard, type PastCardData } from '@/components/events/PastEventCard';
 import { RsvpButton } from '@/components/events/RsvpDialog';
 import { googleCalendarUrl } from '@/lib/calendar';
@@ -34,16 +35,19 @@ export default async function EventsPage() {
         ) : (
           upcoming.map((e, i) => (
             <article key={e.id} className="upcoming-card">
-              <Link href={`/events/${e.slug}`} className="upcoming-card__image" tabIndex={-1} aria-hidden="true">
-                <Image
-                  src={e.image.src}
-                  alt=""
-                  fill
-                  sizes="(max-width: 1100px) 100vw, 700px"
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                  style={{ objectPosition: `${e.image.focalX ?? 50}% ${e.image.focalY ?? 50}%` }}
-                />
-              </Link>
+              <ViewTransition name={`event-image-${e.slug}`} share="morph" default="none">
+                <Link href={`/events/${e.slug}`} className="upcoming-card__image" tabIndex={-1} aria-hidden="true">
+                  <Image
+                    src={e.image.src}
+                    alt=""
+                    fill
+                    sizes="(max-width: 1100px) 100vw, 700px"
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    style={{ objectPosition: `${e.image.focalX ?? 50}% ${e.image.focalY ?? 50}%` }}
+                    {...(e.image.blurDataURL ? { placeholder: 'blur' as const, blurDataURL: e.image.blurDataURL } : {})}
+                  />
+                </Link>
+              </ViewTransition>
               <div className="upcoming-card__body">
                 <h2>
                   <Link href={`/events/${e.slug}`} className="upcoming-card__title">

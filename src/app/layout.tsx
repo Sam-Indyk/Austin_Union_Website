@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { EB_Garamond, Nunito_Sans } from 'next/font/google';
+import { preload } from 'react-dom';
 import './globals.css';
 
 const garamond = EB_Garamond({
@@ -31,6 +32,9 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
+  // Headings use these on every page; fetching them up front avoids a visible font swap.
+  preload('/fonts/neue-ohio-schrift.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
+  preload('/fonts/neue-ohio-schrift-italic.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
   return (
     <html lang="en" className={`${garamond.variable} ${sans.variable}`}>
       <body>{children}</body>

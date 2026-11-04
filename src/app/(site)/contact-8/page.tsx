@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { ContactForm } from '@/components/forms/ContactForm';
 import { SocialLinks } from '@/components/SocialLinks';
-import { getContact, getSettings } from '@/lib/content/repo';
+import { blurOf, getContact, getSettings } from '@/lib/content/repo';
 
 export const metadata: Metadata = { title: 'CONTACT' };
 
@@ -11,7 +11,7 @@ export default async function ContactPage() {
   return (
     <div className="contact-page">
       <div className="contact-page__bg" aria-hidden="true">
-        <Image src="/media/site/contact-background.jpg" alt="" fill sizes="100vw" loading="eager" />
+        <Image src="/media/site/contact-background.jpg" alt="" fill sizes="100vw" loading="eager" placeholder="blur" blurDataURL={blurOf('/media/site/contact-background.jpg')} />
       </div>
       <div className="contact-card">
         <div className="contact-card__top">
