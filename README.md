@@ -11,19 +11,29 @@ out automatically.
 desktop width (within a few pixels) and with a cleaner phone layout. Content is read
 from `src/lib/content/seed.ts` through `src/lib/content/repo.ts`.
 
-**Phase 2 — database, sign-in, admin, votes (in progress).**
+**Phase 2 — database, sign-in, admin, editing, email (done locally).**
 - Local Supabase; the site reads content from it and forms write to it.
 - Sign-in at `/login` with a 6-digit email code (any address) or Google. A person
   can have several addresses; signing in with any of them reaches the same
   account, and members can add addresses from `/account`.
-- Admin at `/admin` (officers only): overview, **People & Members** (memberships,
-  addresses, staff access), **Votes**, **Inbox**.
+- **Edit mode:** officers see an "Edit this page" bar on every public page.
+  Clicking a block (the essay, a Mission section, a team card, the banner, the
+  footer…) opens a panel to change it; every save can be undone. Banner photos
+  are made black-and-white and re-arranged automatically.
+- Admin at `/admin` (officers only): overview, **Events** (create/edit with photo,
+  scheduling, members-only/unlisted, capacity + waitlist, RSVP list, door check-in
+  and walk-ins, CSV export, email preview), **Votes**, **People & Members**
+  (memberships, addresses, staff access, Wix contact import), **Inbox**.
+- Email: an announcement goes to the mailing list when an event goes live, a
+  reminder to guests before it starts, and an RSVP confirmation with a cancel link.
+  Every list email has one-click unsubscribe.
 - Votes at `/vote` (jumps to the open vote) and `/vote/<name>`; projector view at
   `/vote/<name>/present`. Initial + final debate votes with swing, or single votes;
   configurable eligibility, result visibility and secret ballots.
 
-**Next:** on-page edit mode, events admin (create/edit, RSVP list, check-in),
-announcement/reminder emails, the Wix contact import, Swoogo registration.
+**Next:** hosting (Supabase + Vercel under the society's own account — see
+[docs/OPERATIONS.md](docs/OPERATIONS.md)), DNS cut-over, Swoogo registration
+for UATX events, Stripe for dues and donations.
 
 ## Running it
 
@@ -79,6 +89,10 @@ validation; admin screens act as the signed-in user.
 | `src/lib/collage-render.ts` | Composes those photos into one banner image + blurred preview. |
 | `scripts/build-media.ts` | `npm run media:build` — rebuilds the seed banner and image previews. |
 | `src/app/actions.ts` | Form handlers (sign-up, message, RSVP). |
+| `src/app/(site)/admin/` | The Officers' Desk: events, votes, people, inbox. |
+| `src/components/edit/` + `src/app/(site)/edit/actions.ts` | On-page edit mode (panels and their save actions). |
+| `src/lib/email/` | Email templates (house style) and the announcement/reminder sender. |
+| `docs/OPERATIONS.md` | Accounts, hosting, email, Google sign-in, and the handover checklist. |
 | `src/lib/store/` | Where submissions are saved (Supabase, or a local file without it). |
 | `src/lib/supabase/` | Supabase clients and generated database types (`npm run db:types`). |
 | `supabase/` | Local Supabase config and SQL migrations. |

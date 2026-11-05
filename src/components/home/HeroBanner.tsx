@@ -26,7 +26,7 @@ export function HeroBanner({ banner, children }: { banner: CollageBanner; childr
   } as CSSProperties;
 
   return (
-    <section className="hero" aria-label="Upcoming event" style={style}>
+    <section className="hero" aria-label="Upcoming event" style={style} data-edit="collage" data-edit-label="Banner photos">
       <div className="hero__blur" aria-hidden="true" />
       <BannerPicture mobileSrcSet={mobile.srcSet!} desktop={desktop} />
       {children}

@@ -34,7 +34,7 @@ export default async function EventsPage() {
           <p className="events-upcoming__empty">New events are coming soon — join the mailing list to hear first.</p>
         ) : (
           upcoming.map((e, i) => (
-            <article key={e.id} className="upcoming-card">
+            <article key={e.id} className="upcoming-card" data-edit={`event:${e.id}`} data-edit-label={e.title}>
               <ViewTransition name={`event-image-${e.slug}`} share="morph" default="none">
                 <Link href={`/events/${e.slug}`} className="upcoming-card__image" tabIndex={-1} aria-hidden="true">
                   <Image

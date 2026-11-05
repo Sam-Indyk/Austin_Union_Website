@@ -18,7 +18,7 @@ export default async function MissionPage() {
   return (
     <div className="page">
       <header className="mission-head">
-        <div className="mission-head__box">
+        <div className="mission-head__box" data-edit="mission:title" data-edit-label="Page title">
           <Ornament name="flourish" />
           <h1>{mission.title}</h1>
           <Ornament name="flourish" />
@@ -26,7 +26,7 @@ export default async function MissionPage() {
       </header>
 
       {mission.sections.map((s) => (
-        <section key={s.id} id={s.id} className={`mission-section theme-${s.theme}`}>
+        <section key={s.id} id={s.id} className={`mission-section theme-${s.theme}`} data-edit={`mission:section:${s.id}`} data-edit-label={s.heading}>
           <div className="mission-section__inner">
             <h2>
               <SectionOrnament char={s.ornament} color={s.ornamentColor} />
@@ -39,11 +39,11 @@ export default async function MissionPage() {
 
       <section className={`mission-section mission-contact theme-${c.theme}`} id="further-questions">
         <div className="mission-section__inner">
-          <h2>
+          <h2 data-edit="mission:contact" data-edit-label={c.heading}>
             <SectionOrnament char={c.ornament} color="gold" />
             {c.heading}
           </h2>
-          <p className="mission-contact__intro">{c.intro}</p>
+          <p className="mission-contact__intro" data-edit="mission:contact" data-edit-label={c.heading}>{c.intro}</p>
           <SocialLinks links={settings.social} />
           <ContactForm variant="mission" page="/mission" />
         </div>

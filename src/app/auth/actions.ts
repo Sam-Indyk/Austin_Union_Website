@@ -4,6 +4,7 @@ import { createHash, randomInt } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { ensureOwnerAccess } from '@/lib/auth/owners';
 import { getViewer, safeNext } from '@/lib/auth/viewer';
 import { codeEmail, sendMail } from '@/lib/email/send';
 import { serviceClient } from '@/lib/supabase/clients';
@@ -39,8 +40,9 @@ export async function verifySignInCode(_prev: AuthState, form: FormData): Promis
   const next = safeNext(field(form, 'next'));
   if (token.length !== 6) return { step: 'code', email, error: 'Enter the 6-digit code from the email.' };
   const supabase = await sessionClient();
-  const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
-  if (error) return { step: 'code', email, error: 'That code didn’t work. Check the latest email, or send a new code.' };
+  const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+  if (error || !data.user) return { step: 'code', email, error: 'That code didn’t work. Check the latest email, or send a new code.' };
+  await ensureOwnerAccess(data.user.id, email);
   redirect(next);
 }
 

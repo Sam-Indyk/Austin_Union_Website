@@ -64,9 +64,14 @@ async function People({ searchParams }: { searchParams: PageProps<'/admin/people
           </p>
         </div>
         {viewer.staffRole === 'admin' && (
-          <Link href="/admin/people/new" className="ui-btn">
-            Add a person
-          </Link>
+          <div className="badge-list" style={{ gap: 10 }}>
+            <Link href="/admin/people/import" className="ui-btn ui-btn--ghost">
+              Import from Wix
+            </Link>
+            <Link href="/admin/people/new" className="ui-btn">
+              Add a person
+            </Link>
+          </div>
         )}
       </header>
       {flash && <p className="ui-notice">{flash}</p>}

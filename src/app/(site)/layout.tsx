@@ -1,6 +1,7 @@
 import { Suspense, ViewTransition } from 'react';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader, SiteHeaderWithPath } from '@/components/SiteHeader';
+import { EditMode } from '@/components/edit/EditMode';
 
 export default function SiteLayout({ children }: LayoutProps<'/'>) {
   return (
@@ -16,6 +17,10 @@ export default function SiteLayout({ children }: LayoutProps<'/'>) {
         </main>
       </ViewTransition>
       <SiteFooter />
+      {/* Officers only: the edit bar checks the session itself, so pages stay cached for everyone. */}
+      <Suspense>
+        <EditMode />
+      </Suspense>
     </>
   );
 }

@@ -49,8 +49,12 @@ export function RsvpButton({ slug, title, when, calendar, label = 'RSVP', classN
         <div className="rsvp-dialog__body">
           {state.status === 'ok' ? (
             <div className="rsvp-done">
-              <h3>{state.duplicate ? 'You’re already on the list.' : 'You’re going.'}</h3>
-              <p>An email with all the event info is on its way to you.</p>
+              <h3>{state.duplicate ? 'You’re already on the list.' : state.waitlisted ? 'You’re on the waitlist.' : 'You’re going.'}</h3>
+              <p>
+                {state.waitlisted
+                  ? 'The event is full right now. We’ll email you if a spot opens up.'
+                  : 'An email with all the event info is on its way to you.'}
+              </p>
               <div className="calendar-links">
                 <a href={calendar.google} target="_blank" rel="noopener noreferrer">
                   Add to Google Calendar

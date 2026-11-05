@@ -71,16 +71,36 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"email_campaigns": {
+                },"contact_imports": {
                   Row: {
-                    "audience": NonNullable<Json>,"content": NonNullable<Json>,"created_at": string,"created_by": string | null,"event_id": string | null,"id": string,"kind": string,"scheduled_at": string | null,"sent_at": string | null,"status": string,"subject": string,"updated_at": string,"vote_id": string | null
+                    "created": number,"created_at": string,"filename": string,"id": string,"imported_by": string | null,"skipped": number,"total": number,"updated": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "audience"?: NonNullable<Json>,"content"?: NonNullable<Json>,"created_at"?: string,"created_by"?: string | null,"event_id"?: string | null,"id"?: string,"kind": string,"scheduled_at"?: string | null,"sent_at"?: string | null,"status"?: string,"subject": string,"updated_at"?: string,"vote_id"?: string | null
+                    "created"?: number,"created_at"?: string,"filename": string,"id"?: string,"imported_by"?: string | null,"skipped"?: number,"total"?: number,"updated"?: number
                   }
                   Update: {
-                    "audience"?: NonNullable<Json>,"content"?: NonNullable<Json>,"created_at"?: string,"created_by"?: string | null,"event_id"?: string | null,"id"?: string,"kind"?: string,"scheduled_at"?: string | null,"sent_at"?: string | null,"status"?: string,"subject"?: string,"updated_at"?: string,"vote_id"?: string | null
+                    "created"?: number,"created_at"?: string,"filename"?: string,"id"?: string,"imported_by"?: string | null,"skipped"?: number,"total"?: number,"updated"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "contact_imports_imported_by_fkey"
+      columns: ["imported_by"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"email_campaigns": {
+                  Row: {
+                    "audience": NonNullable<Json>,"content": NonNullable<Json>,"created_at": string,"created_by": string | null,"event_id": string | null,"failed_count": number,"id": string,"kind": string,"last_error": string | null,"scheduled_at": string | null,"sent_at": string | null,"sent_count": number,"started_at": string | null,"status": string,"subject": string,"updated_at": string,"vote_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "audience"?: NonNullable<Json>,"content"?: NonNullable<Json>,"created_at"?: string,"created_by"?: string | null,"event_id"?: string | null,"failed_count"?: number,"id"?: string,"kind": string,"last_error"?: string | null,"scheduled_at"?: string | null,"sent_at"?: string | null,"sent_count"?: number,"started_at"?: string | null,"status"?: string,"subject": string,"updated_at"?: string,"vote_id"?: string | null
+                  }
+                  Update: {
+                    "audience"?: NonNullable<Json>,"content"?: NonNullable<Json>,"created_at"?: string,"created_by"?: string | null,"event_id"?: string | null,"failed_count"?: number,"id"?: string,"kind"?: string,"last_error"?: string | null,"scheduled_at"?: string | null,"sent_at"?: string | null,"sent_count"?: number,"started_at"?: string | null,"status"?: string,"subject"?: string,"updated_at"?: string,"vote_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -151,14 +171,14 @@ isOneToOne: false
                   ]
                 },"events": {
                   Row: {
-                    "address": string | null,"capacity": number | null,"created_at": string,"created_by": string | null,"description": string,"ends_at": string,"feature_on_home": boolean,"home_card": Json | null,"id": string,"image": NonNullable<Json>,"location_name": string,"member_kinds": (Database["public"]['Enums']["membership_kind"])[] | null,"partner": Json | null,"publish_at": string | null,"recap": Json | null,"rsvp_closes_at": string | null,"rsvp_mode": string,"slug": string,"starts_at": string,"status": Database["public"]['Enums']["event_status"],"summary": string,"title": string,"updated_at": string,"visibility": Database["public"]['Enums']["event_visibility"]
+                    "address": string | null,"announce": boolean,"capacity": number | null,"created_at": string,"created_by": string | null,"description": string,"ends_at": string,"feature_on_home": boolean,"home_card": Json | null,"id": string,"image": NonNullable<Json>,"location_name": string,"member_kinds": (Database["public"]['Enums']["membership_kind"])[] | null,"partner": Json | null,"publish_at": string | null,"recap": Json | null,"reminder_hours": number | null,"rsvp_closes_at": string | null,"rsvp_mode": string,"slug": string,"starts_at": string,"status": Database["public"]['Enums']["event_status"],"summary": string,"title": string,"updated_at": string,"visibility": Database["public"]['Enums']["event_visibility"]
                   }
                   ComputedFields: never
                   Insert: {
-                    "address"?: string | null,"capacity"?: number | null,"created_at"?: string,"created_by"?: string | null,"description"?: string,"ends_at": string,"feature_on_home"?: boolean,"home_card"?: Json | null,"id"?: string,"image": NonNullable<Json>,"location_name"?: string,"member_kinds"?: (Database["public"]['Enums']["membership_kind"])[] | null,"partner"?: Json | null,"publish_at"?: string | null,"recap"?: Json | null,"rsvp_closes_at"?: string | null,"rsvp_mode"?: string,"slug": string,"starts_at": string,"status"?: Database["public"]['Enums']["event_status"],"summary"?: string,"title": string,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["event_visibility"]
+                    "address"?: string | null,"announce"?: boolean,"capacity"?: number | null,"created_at"?: string,"created_by"?: string | null,"description"?: string,"ends_at": string,"feature_on_home"?: boolean,"home_card"?: Json | null,"id"?: string,"image": NonNullable<Json>,"location_name"?: string,"member_kinds"?: (Database["public"]['Enums']["membership_kind"])[] | null,"partner"?: Json | null,"publish_at"?: string | null,"recap"?: Json | null,"reminder_hours"?: number | null,"rsvp_closes_at"?: string | null,"rsvp_mode"?: string,"slug": string,"starts_at": string,"status"?: Database["public"]['Enums']["event_status"],"summary"?: string,"title": string,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["event_visibility"]
                   }
                   Update: {
-                    "address"?: string | null,"capacity"?: number | null,"created_at"?: string,"created_by"?: string | null,"description"?: string,"ends_at"?: string,"feature_on_home"?: boolean,"home_card"?: Json | null,"id"?: string,"image"?: NonNullable<Json>,"location_name"?: string,"member_kinds"?: (Database["public"]['Enums']["membership_kind"])[] | null,"partner"?: Json | null,"publish_at"?: string | null,"recap"?: Json | null,"rsvp_closes_at"?: string | null,"rsvp_mode"?: string,"slug"?: string,"starts_at"?: string,"status"?: Database["public"]['Enums']["event_status"],"summary"?: string,"title"?: string,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["event_visibility"]
+                    "address"?: string | null,"announce"?: boolean,"capacity"?: number | null,"created_at"?: string,"created_by"?: string | null,"description"?: string,"ends_at"?: string,"feature_on_home"?: boolean,"home_card"?: Json | null,"id"?: string,"image"?: NonNullable<Json>,"location_name"?: string,"member_kinds"?: (Database["public"]['Enums']["membership_kind"])[] | null,"partner"?: Json | null,"publish_at"?: string | null,"recap"?: Json | null,"reminder_hours"?: number | null,"rsvp_closes_at"?: string | null,"rsvp_mode"?: string,"slug"?: string,"starts_at"?: string,"status"?: Database["public"]['Enums']["event_status"],"summary"?: string,"title"?: string,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["event_visibility"]
                   }
                   Relationships: [
                     {
@@ -310,6 +330,26 @@ isOneToOne: false
                     {
       foreignKeyName: "site_content_updated_by_fkey"
       columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"site_content_revisions": {
+                  Row: {
+                    "created_at": string,"id": number,"key": string,"saved_by": string | null,"value": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: never,"key": string,"saved_by"?: string | null,"value": NonNullable<Json>
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: never,"key"?: string,"saved_by"?: string | null,"value"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "site_content_revisions_saved_by_fkey"
+      columns: ["saved_by"]
 isOneToOne: false
       referencedRelation: "people"
       referencedColumns: ["id"]

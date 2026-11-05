@@ -1,0 +1,984 @@
+/* ==========================================================================
+   Officer tools: the rich-text editor, photo fields, the events desk (list,
+   editor, emails, guest list / check-in) and on-page edit mode. Same
+   vocabulary as ui.css: ink rules, the society red, cream paper.
+   ========================================================================== */
+
+/* --- rich text editor ------------------------------------------------------ */
+.rich-editor {
+  border: 1px solid rgba(47, 46, 46, 0.35);
+  background: var(--white);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rich-editor:focus-within {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(127, 31, 32, 0.12);
+}
+
+.rich-editor__bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 6px;
+  border-bottom: 1px solid rgba(47, 46, 46, 0.14);
+  background: #f7f7f2;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.rich-editor__btn {
+  min-width: 32px;
+  height: 30px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.rich-editor__btn:hover:not(:disabled) {
+  background: rgba(47, 46, 46, 0.08);
+}
+
+.rich-editor__btn.is-on {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.rich-editor__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.rich-editor__sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 5px;
+  background: rgba(47, 46, 46, 0.2);
+}
+
+.rich-editor__area {
+  min-height: var(--min-h, 160px);
+  padding: 14px 16px;
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink);
+  outline: none;
+}
+
+.rich-editor__area p + p {
+  margin-top: 0.75em;
+}
+
+.rich-editor__area ul,
+.rich-editor__area ol {
+  padding-left: 1.4em;
+  margin: 0.5em 0;
+}
+
+.rich-editor__area a {
+  color: var(--red);
+}
+
+/* Same face as the homepage essay, so what you type looks like what visitors see. */
+.rich-editor__area--essay {
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.rich-editor__area.is-editor-empty:first-child::before,
+.rich-editor__area p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: rgba(47, 46, 46, 0.4);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* --- photo field --------------------------------------------------------------- */
+.image-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.image-field__drop {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px dashed rgba(47, 46, 46, 0.4);
+  background: #fbfbf8;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.image-field__drop.is-drag {
+  border-color: var(--red);
+  background: #fdf3f3;
+}
+
+.image-field__drop.has-image {
+  border-style: solid;
+  border-color: rgba(47, 46, 46, 0.18);
+}
+
+.image-field__preview {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #e8e8e1;
+  cursor: crosshair;
+}
+
+.image-field__preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-field__focus {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 2px solid var(--white);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  transition: left 0.15s ease, top 0.15s ease;
+}
+
+.image-field__empty {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--gray);
+  padding: 18px 0 4px;
+}
+
+.image-field__choose {
+  cursor: pointer;
+}
+
+/* --- small form pieces ---------------------------------------------------------- */
+.disclose {
+  margin: 4px 0 18px;
+  border-top: 1px solid rgba(47, 46, 46, 0.12);
+  padding-top: 12px;
+}
+
+.disclose > summary {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--red);
+  cursor: pointer;
+  list-style: none;
+}
+
+.disclose > summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclose > summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 1em;
+  transition: transform 0.15s ease;
+}
+
+.disclose[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.slug-field {
+  display: flex;
+  align-items: stretch;
+}
+
+.slug-field > span {
+  display: flex;
+  align-items: center;
+  padding: 0 4px 0 12px;
+  border: 1px solid rgba(47, 46, 46, 0.35);
+  border-right: 0;
+  background: #f4f4ee;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--gray);
+  white-space: nowrap;
+}
+
+.slug-field .ui-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.thumb-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.thumb-grid li {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #e8e8e1;
+  overflow: hidden;
+}
+
+.thumb-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumb-grid label {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+/* --- events desk: list --------------------------------------------------------- */
+.event-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.event-rows .panel + .panel {
+  margin-top: 0;
+}
+
+.event-row {
+  display: grid;
+  grid-template-columns: 148px 1fr auto auto;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 22px 14px 14px;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.event-row:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+}
+
+.event-row__img {
+  display: block;
+  aspect-ratio: 3 / 2;
+  background: #e8e8e1 center / cover no-repeat;
+}
+
+.event-row__date {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 3px;
+}
+
+.event-row__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.event-row__title:hover {
+  color: var(--red);
+}
+
+.event-row__rsvps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 84px;
+  text-align: center;
+}
+
+.event-row__rsvps > div,
+.event-row__rsvps > a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+}
+
+.event-row__rsvps .stat__num {
+  font-size: 34px;
+}
+
+.event-row__actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* --- events desk: editor -------------------------------------------------------- */
+.event-edit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 26px;
+  align-items: start;
+}
+
+.event-edit__side {
+  position: sticky;
+  top: 22px;
+}
+
+.email-panel h2 {
+  margin-bottom: 8px;
+}
+
+.email-panel__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(47, 46, 46, 0.1);
+}
+
+.email-panel__name {
+  font-family: var(--font-display);
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.email-panel .rule {
+  margin: 18px 0 14px;
+}
+
+.email-panel__tabs {
+  display: flex;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(47, 46, 46, 0.18);
+}
+
+.email-panel__tabs button {
+  padding: 6px 12px;
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--gray);
+  cursor: pointer;
+}
+
+.email-panel__tabs button.is-on {
+  color: var(--ink);
+  border-bottom-color: var(--red);
+}
+
+/* The preview shows the email at real width, scaled down to fit the column. */
+.email-preview {
+  position: relative;
+  height: 520px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(47, 46, 46, 0.14);
+  background: #f2f2ec;
+}
+
+.email-preview iframe {
+  width: 166.67%;
+  height: 166.67%;
+  border: 0;
+  transform: scale(0.6);
+  transform-origin: 0 0;
+  background: #f2f2ec;
+}
+
+/* --- events desk: guests & check-in ---------------------------------------------- */
+.stat-row--four {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.stat-row--four .stat:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.guest-tools {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.guest-tools .ui-input {
+  flex: 1;
+  height: 52px;
+  font-size: 19px;
+}
+
+.walk-in {
+  margin-bottom: 18px;
+}
+
+.walk-in.panel + .panel {
+  margin-top: 0;
+}
+
+.guest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+  border: 1px solid rgba(47, 46, 46, 0.14);
+}
+
+.guest {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px 12px 20px;
+  border-bottom: 1px solid rgba(47, 46, 46, 0.09);
+  transition: background-color 0.2s ease;
+}
+
+.guest:last-child {
+  border-bottom: 0;
+}
+
+.guest.is-in {
+  background: #f6faf4;
+}
+
+.guest.is-waitlist .guest__name::after {
+  content: 'Waitlist';
+  margin-left: 10px;
+  padding: 2px 7px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a6a00;
+  background: #fbf3d5;
+  vertical-align: 3px;
+}
+
+.guest.is-cancelled .guest__name {
+  text-decoration: line-through;
+  color: var(--gray);
+}
+
+.guest--empty {
+  justify-content: center;
+  padding: 28px;
+  font-family: var(--font-body);
+}
+
+.guest__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.guest__name {
+  font-family: var(--font-display);
+  font-size: 19px;
+  color: var(--ink);
+}
+
+.guest__email {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--gray);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.guest__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+/* Big enough to hit on a phone at the door. */
+.checkin {
+  min-width: 118px;
+  height: 44px;
+  padding: 0 16px;
+  border: 1.5px solid var(--ink);
+  background: var(--white);
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.checkin:hover {
+  background: #f3f3ee;
+}
+
+.checkin.is-on {
+  background: #2f6b3a;
+  border-color: #2f6b3a;
+  color: var(--white);
+}
+
+/* --- on-page edit mode -------------------------------------------------------------- */
+.edit-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  transform: translateX(-50%);
+  background: var(--ink);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  animation: edit-rise 0.25s ease both;
+  max-width: calc(100vw - 32px);
+}
+
+/* With a panel open, the bar centres on the part of the page still visible. */
+.edit-ui:has(.edit-panel) .edit-bar {
+  left: calc((100vw - 460px) / 2);
+}
+
+@keyframes edit-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+}
+
+.edit-bar__main,
+.edit-bar__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--white);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.edit-bar__main {
+  background: var(--red);
+}
+
+.edit-bar__main:hover {
+  background: #962627;
+}
+
+.edit-bar.is-on .edit-bar__main {
+  background: var(--white);
+  color: var(--ink);
+}
+
+.edit-bar__link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.edit-bar__hint {
+  padding: 0 12px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+}
+
+/* Room under the footer so the bar never covers the last thing on the page. */
+body:has(.edit-bar) {
+  padding-bottom: 76px;
+}
+
+/* Editable blocks: a quiet dashed outline, solid red on hover. */
+.is-editing [data-edit] {
+  outline: 1.5px dashed rgba(127, 31, 32, 0.45);
+  outline-offset: -2px;
+  cursor: pointer;
+  transition: outline-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.is-editing [data-edit] [data-edit] {
+  outline-offset: 2px;
+}
+
+.is-editing [data-edit]:hover:not(:has([data-edit]:hover)) {
+  outline: 2px solid var(--red);
+  box-shadow: inset 0 0 0 9999px rgba(127, 31, 32, 0.05);
+}
+
+.is-editing [data-edit] a,
+.is-editing [data-edit] button,
+.is-editing [data-edit] input,
+.is-editing [data-edit] textarea {
+  pointer-events: none;
+}
+
+.is-editing .site-footer[data-edit],
+.is-editing .theme-red[data-edit],
+.is-editing .theme-maroon[data-edit],
+.is-editing .theme-charcoal[data-edit],
+.is-editing .theme-navy[data-edit] {
+  outline-color: rgba(255, 255, 255, 0.55);
+}
+
+.is-editing .site-footer[data-edit]:hover,
+.is-editing .theme-red[data-edit]:hover:not(:has([data-edit]:hover)),
+.is-editing .theme-maroon[data-edit]:hover,
+.is-editing .theme-charcoal[data-edit]:hover,
+.is-editing .theme-navy[data-edit]:hover {
+  outline-color: var(--white);
+  box-shadow: inset 0 0 0 9999px rgba(255, 255, 255, 0.06);
+}
+
+/* The panel slides in from the right and leaves the page visible beside it. */
+.edit-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  width: 460px;
+  max-width: 100vw;
+  background: var(--cream);
+  box-shadow: -14px 0 40px rgba(0, 0, 0, 0.22);
+  animation: edit-slide 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes edit-slide {
+  from {
+    transform: translateX(28px);
+    opacity: 0;
+  }
+}
+
+.edit-panel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  background: var(--maroon);
+  color: var(--white);
+  border-bottom: 3px solid var(--pink);
+}
+
+.edit-panel__kicker {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pink);
+}
+
+.edit-panel__head h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--white);
+}
+
+.edit-panel__close {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--white);
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.edit-panel__close:hover {
+  opacity: 1;
+}
+
+.edit-panel__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px 28px;
+  overscroll-behavior: contain;
+}
+
+.edit-panel__body .ui-notice,
+.edit-panel__body .ui-error {
+  margin-top: 14px;
+}
+
+.edit-panel__body .rule {
+  margin: 26px 0 20px;
+}
+
+.edit-panel__body .ui-row {
+  grid-template-columns: 1fr 1fr;
+}
+
+.edit-panel__h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+.edit-panel__ops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(47, 46, 46, 0.12);
+}
+
+.edit-panel__foot {
+  padding: 12px 24px;
+  border-top: 1px solid rgba(47, 46, 46, 0.14);
+  background: #e6e6dc;
+}
+
+/* Ornament & colour pickers */
+.orn-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.orn-picker button {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(47, 46, 46, 0.25);
+  background: var(--white);
+  font-size: 26px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.orn-picker button.is-on {
+  border-color: var(--red);
+  box-shadow: inset 0 0 0 1px var(--red);
+  color: var(--red);
+}
+
+.theme-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.theme-picker button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 11px 0 8px;
+  border: 1px solid rgba(47, 46, 46, 0.25);
+  background: var(--white);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.theme-picker button i {
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.theme-picker button.is-on {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+/* Banner photos */
+.collage-add {
+  margin-bottom: 16px;
+}
+
+.collage-add .ui-btn {
+  cursor: pointer;
+}
+
+.collage-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.collage-list li {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 6px;
+  background: var(--white);
+  border: 1px solid rgba(47, 46, 46, 0.12);
+}
+
+.collage-list img {
+  width: 96px;
+  height: 64px;
+  object-fit: cover;
+  filter: grayscale(1);
+  display: block;
+}
+
+.collage-list__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.collage-list__tools .muted {
+  width: 100%;
+}
+
+/* --- contact import ---------------------------------------------------------------- */
+.import-steps {
+  padding-left: 1.3em;
+}
+
+.import-steps li + li {
+  margin-top: 4px;
+}
+
+.import-drop {
+  align-items: center;
+  padding: 26px 14px 22px;
+  text-align: center;
+}
+
+.import-drop .image-field__empty {
+  padding: 0;
+  color: var(--ink);
+}
+
+.import-preview {
+  border: 1px solid rgba(47, 46, 46, 0.14);
+}
+
+/* --- small screens ---------------------------------------------------------------- */
+@media (max-width: 1080px) {
+  .event-edit {
+    grid-template-columns: 1fr;
+  }
+
+  .event-edit__side {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .event-row {
+    grid-template-columns: 96px 1fr;
+    gap: 12px 16px;
+    padding: 12px;
+  }
+
+  .event-row__rsvps {
+    align-items: flex-start;
+    flex-direction: row;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .event-row__rsvps .stat__num {
+    font-size: 26px;
+  }
+
+  .event-row__actions {
+    grid-column: 1 / -1;
+  }
+
+  .stat-row--four {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-row--four .stat {
+    padding: 14px 16px;
+  }
+
+  .stat-row--four .stat__num {
+    font-size: 34px;
+  }
+
+  .guest {
+    padding: 10px 12px;
+  }
+
+  .guest__actions {
+    gap: 10px;
+  }
+
+  .guest {
+    flex-wrap: wrap;
+  }
+
+  .guest__actions {
+    margin-left: auto;
+  }
+
+  .slug-field > span {
+    display: none;
+  }
+
+  .edit-bar__hint {
+    display: none;
+  }
+
+  .edit-bar {
+    bottom: 14px;
+  }
+
+  .edit-panel {
+    width: 100vw;
+  }
+
+  .edit-panel__body .ui-row {
+    grid-template-columns: 1fr;
+  }
+}

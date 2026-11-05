@@ -59,7 +59,7 @@ async function EventContent({ params }: Pick<PageProps<'/events/[slug]'>, 'param
   const videoId = e.recap?.youtubeUrl ? youtubeId(e.recap.youtubeUrl) : undefined;
 
   return (
-    <article className="event-page">
+    <article className="event-page" data-edit={`event:${e.id}`} data-edit-label={e.title}>
       <div className="event-page__inner">
         <h1 className="event-title">{e.title}</h1>
         <p className="event-meta">

@@ -31,6 +31,16 @@ export interface RsvpInput {
   firstName: string;
   lastName: string;
   email: string;
+  /** Guests beyond this many "going" RSVPs are waitlisted. */
+  capacity?: number;
+}
+
+export interface RsvpResult {
+  duplicate: boolean;
+  count: number;
+  status: 'going' | 'waitlist';
+  /** Secret link token that lets the guest cancel. */
+  manageToken?: string;
 }
 
 export interface Store {
@@ -38,7 +48,7 @@ export interface Store {
   upsertContact(input: ContactInput): Promise<{ created: boolean }>;
   addMessage(input: MessageInput): Promise<void>;
   /** Returns duplicate=true if this email already RSVP'd to the event. */
-  addRsvp(input: RsvpInput): Promise<{ duplicate: boolean; count: number }>;
+  addRsvp(input: RsvpInput): Promise<RsvpResult>;
 }
 
 // ---------------------------------------------------------------------------
@@ -103,7 +113,7 @@ const devStore: Store = {
       const email = input.email.toLowerCase();
       const duplicate = db.rsvps.some((r) => r.eventId === input.eventId && r.email === email);
       if (!duplicate) db.rsvps.push({ ...input, email, createdAt: now() });
-      return { duplicate, count: db.rsvps.filter((r) => r.eventId === input.eventId).length };
+      return { duplicate, count: db.rsvps.filter((r) => r.eventId === input.eventId).length, status: 'going' as const };
     });
   },
 };
@@ -136,16 +146,29 @@ const supabaseStore: Store = {
   async addRsvp(input) {
     const db = serviceClient();
     const email = input.email.toLowerCase();
-    const person = check(await db.from('people').select('id').eq('email', email).maybeSingle(), 'people');
-    const res = await db
-      .from('rsvps')
-      .insert({ event_id: input.eventId, first_name: input.firstName, last_name: input.lastName, email, person_id: person?.id ?? null })
-      .select('id')
-      .maybeSingle();
-    const duplicate = res.error?.code === '23505';
-    if (res.error && !duplicate) throw new Error(`rsvps.insert: ${res.error.message}`);
-    const { count } = await db.from('rsvps').select('id', { count: 'exact', head: true }).eq('event_id', input.eventId).neq('status', 'cancelled');
-    return { duplicate, count: count ?? 0 };
+    const owner = check(await db.from('person_emails').select('person_id').eq('email', email).maybeSingle(), 'person_emails');
+    const going = async () =>
+      (await db.from('rsvps').select('id', { count: 'exact', head: true }).eq('event_id', input.eventId).eq('status', 'going')).count ?? 0;
+    const status = input.capacity && (await going()) >= input.capacity ? 'waitlist' : 'going';
+
+    const existing = check(
+      await db.from('rsvps').select('id, status, manage_token').eq('event_id', input.eventId).eq('email', email).maybeSingle(),
+      'rsvps',
+    );
+    if (existing && existing.status !== 'cancelled') {
+      return { duplicate: true, count: await going(), status: existing.status as RsvpResult['status'], manageToken: existing.manage_token };
+    }
+    // A previously cancelled RSVP is revived rather than duplicated.
+    const res = existing
+      ? await db.from('rsvps').update({ status, first_name: input.firstName, last_name: input.lastName }).eq('id', existing.id).select('manage_token').single()
+      : await db
+          .from('rsvps')
+          .insert({ event_id: input.eventId, first_name: input.firstName, last_name: input.lastName, email, person_id: owner?.person_id ?? null, status })
+          .select('manage_token')
+          .single();
+    if (res.error?.code === '23505') return { duplicate: true, count: await going(), status: 'going' };
+    if (res.error) throw new Error(`rsvps.insert: ${res.error.message}`);
+    return { duplicate: false, count: await going(), status, manageToken: res.data.manage_token };
   },
 };
 

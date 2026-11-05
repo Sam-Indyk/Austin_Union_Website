@@ -45,6 +45,9 @@ async function Overview() {
         <section className="panel">
           <div className="panel__head">
             <h2>Upcoming events</h2>
+            <Link href="/admin/events/new" className="ui-btn ui-btn--small">
+              New event
+            </Link>
           </div>
           {(events.data ?? []).length === 0 ? (
             <p className="prose">No upcoming events.</p>
@@ -52,14 +55,18 @@ async function Overview() {
             <ul className="admin-list">
               {(events.data ?? []).map((e) => (
                 <li key={e.id}>
-                  <Link href={`/events/${e.slug}`}>{e.title}</Link>
-                  <span className="muted">{(e.rsvps as unknown as { count: number }[])[0]?.count ?? 0} RSVPs</span>
+                  <Link href={`/admin/events/${e.id}`}>{e.title}</Link>
+                  <Link href={`/admin/events/${e.id}/guests`} className="muted">
+                    {(e.rsvps as unknown as { count: number }[])[0]?.count ?? 0} RSVPs
+                  </Link>
                 </li>
               ))}
             </ul>
           )}
-          <p className="muted small" style={{ marginTop: 14 }}>
-            Event editing and check-in arrive with the next update.
+          <p className="small" style={{ marginTop: 14 }}>
+            <Link href="/admin/events" className="ui-link">
+              All events, drafts &amp; check-in →
+            </Link>
           </p>
         </section>
 

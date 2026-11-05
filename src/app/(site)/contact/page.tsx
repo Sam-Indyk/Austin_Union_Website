@@ -14,7 +14,7 @@ export default async function ContactPage() {
         <Image src="/media/site/contact-background.jpg" alt="" fill sizes="100vw" loading="eager" placeholder="blur" blurDataURL={blurOf('/media/site/contact-background.jpg')} />
       </div>
       <div className="contact-card">
-        <div className="contact-card__top">
+        <div className="contact-card__top" data-edit="contact" data-edit-label="Contact page">
           <div className="inner">
             <h1>{contact.title}</h1>
             <p>{contact.intro}</p>
@@ -22,8 +22,8 @@ export default async function ContactPage() {
         </div>
         <div className="contact-card__chat">
           <div className="inner">
-            <h2>{contact.formHeading}</h2>
-            <div className="contact-details">
+            <h2 data-edit="contact" data-edit-label="Contact page">{contact.formHeading}</h2>
+            <div className="contact-details" data-edit="contact" data-edit-label="Contact page">
               <div>
                 <h3>Phone</h3>
                 <a href={`tel:${settings.contact.phone.replace(/[^\d+]/g, '')}`}>{settings.contact.phone}</a>

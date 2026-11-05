@@ -32,8 +32,9 @@ function subscribe(onChange: () => void) {
   };
 }
 
-function useSignedIn(): boolean {
-  return useSyncExternalStore(subscribe, hasSession, () => false);
+/** null until the browser has checked (the server can't know who's visiting). */
+function useSignedIn(): boolean | null {
+  return useSyncExternalStore(subscribe, hasSession, () => null);
 }
 
 /** Reads the current path; rendered inside <Suspense> so pages with unknown URLs still prerender. */
@@ -46,8 +47,10 @@ export function SiteHeader({ pathname }: { pathname: string | null }) {
   const signedIn = useSignedIn();
   const current = (href: string) =>
     pathname && (pathname === href || (href !== '/' && pathname.startsWith(href + '/'))) ? ('page' as const) : undefined;
+  // Until we know, the last item keeps its space but stays invisible, so it never flashes the wrong word.
   const account = signedIn ? { href: '/account', label: 'ACCOUNT' } : { href: '/login', label: 'LOGIN' };
   const items = [...NAV, account];
+  const pending = (href: string) => (signedIn === null && href === account.href ? 'is-pending' : undefined);
 
   return (
     <header className="site-header">
@@ -56,7 +59,7 @@ export function SiteHeader({ pathname }: { pathname: string | null }) {
       </a>
       <nav className="site-nav" aria-label="Site">
         {items.map((item) => (
-          <Link key={item.href} href={item.href} aria-current={current(item.href)}>
+          <Link key={item.href} href={item.href} aria-current={current(item.href)} className={pending(item.href)}>
             {item.label}
           </Link>
         ))}
@@ -79,7 +82,7 @@ export function SiteHeader({ pathname }: { pathname: string | null }) {
       </button>
       <nav id="mobile-menu" className="mobile-menu" hidden={!open} aria-label="Site">
         {items.map((item) => (
-          <Link key={item.href} href={item.href} aria-current={current(item.href)} onClick={() => setOpen(false)}>
+          <Link key={item.href} href={item.href} aria-current={current(item.href)} className={pending(item.href)} onClick={() => setOpen(false)}>
             {item.label}
           </Link>
         ))}

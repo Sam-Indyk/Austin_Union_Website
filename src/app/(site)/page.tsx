@@ -41,12 +41,12 @@ export default async function HomePage() {
 
       <section className="essay-section">
         <div className="container">
-          <div className="epigraph">
+          <div className="epigraph" data-edit="home:epigraph" data-edit-label="Opening lines">
             {home.epigraph.map((line) => (
               <p key={line}>{line}</p>
             ))}
           </div>
-          <div className="essay" dangerouslySetInnerHTML={{ __html: withDropCap(home.essay.join('')) }} />
+          <div className="essay" data-edit="home:essay" data-edit-label="Homepage essay" dangerouslySetInnerHTML={{ __html: withDropCap(home.essay.join('')) }} />
           <div className="essay-divider">
             <Image src="/media/site/seal.png" alt="Austin Union Society seal" width={212} height={212} />
           </div>

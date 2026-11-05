@@ -4,6 +4,7 @@ import { preload } from 'react-dom';
 import './globals.css';
 import './ui.css';
 import './app-ui.css';
+import './editing.css';
 
 const garamond = EB_Garamond({
   variable: '--font-garamond',

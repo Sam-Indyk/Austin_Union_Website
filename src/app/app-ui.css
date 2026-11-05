@@ -1258,6 +1258,13 @@ fieldset.bare:disabled {
     gap: 0;
     padding-top: 10px;
   }
+  /* The tabs scroll sideways instead of widening the page. */
+  .admin__tabs {
+    align-self: stretch;
+    max-width: calc(100% + 28px);
+    margin: 0 -14px;
+    scrollbar-width: none;
+  }
   .admin__head h1 {
     font-size: 32px;
   }

@@ -11,7 +11,7 @@ export default async function TeamPage() {
   const team = await getTeam();
   return (
     <div className="team-page">
-      <header className="team-head">
+      <header className="team-head" data-edit="team:header" data-edit-label="Team page & new members">
         <h1>{team.title}</h1>
         <p className="team-head__motto">
           <Ornament name="scroll" />
@@ -19,10 +19,10 @@ export default async function TeamPage() {
           <Ornament name="scroll" className="ornament--flip" />
         </p>
       </header>
-      <RichText html={team.intro} className="team-intro" />
+      <RichText html={team.intro} className="team-intro" data-edit="team:header" data-edit-label="Team page & new members" />
       <ul className="team-grid">
         {team.members.map((m, i) => (
-          <li key={m.id} className="member">
+          <li key={m.id} className="member" data-edit={`team:member:${m.id}`} data-edit-label={m.name}>
             <div className="member__photo">
               <Image
                 src={m.photo.src}

@@ -11,7 +11,7 @@ async function currentYear() {
 export async function SiteFooter() {
   const [settings, year] = await Promise.all([getSettings(), currentYear()]);
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" data-edit="settings" data-edit-label="Footer, social links & mailing address">
       <p className="site-footer__copy">
         All images and content © {year} {settings.copyrightHolder}. ALL RIGHTS RESERVED.
       </p>

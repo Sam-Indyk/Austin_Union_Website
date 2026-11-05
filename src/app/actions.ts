@@ -1,6 +1,11 @@
 'use server';
 
+import { after } from 'next/server';
 import { getEventBySlug } from '@/lib/content/repo';
+import { manageRsvpUrl, subscriberUnsubscribeUrl } from '@/lib/email/campaigns';
+import { hasDatabase } from '@/lib/supabase/clients';
+import { sendMail } from '@/lib/email/send';
+import { rsvpConfirmation } from '@/lib/email/templates';
 import { getStore } from '@/lib/store';
 
 export interface FormState {
@@ -9,6 +14,7 @@ export interface FormState {
   /** For RSVPs to partner-hosted (UATX/Swoogo) events: where to finish registering. */
   partnerUrl?: string;
   duplicate?: boolean;
+  waitlisted?: boolean;
 }
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -67,15 +73,20 @@ export async function rsvp(_prev: FormState, form: FormData): Promise<FormState>
   if (Date.now() > closesAt) return { status: 'error', message: 'Registration is closed.' };
 
   const store = getStore();
-  const { duplicate } = await store.addRsvp({ eventId: event.id, firstName, lastName, email });
   // Everyone who RSVPs joins the mailing list (unless they previously unsubscribed).
   await store.upsertContact({ email, firstName, lastName, source: 'rsvp', subscribe: true });
+  const result = await store.addRsvp({ eventId: event.id, firstName, lastName, email, capacity: event.rsvp.capacity });
+  const partnerUrl = event.rsvp.partner?.url;
 
-  // TODO(phase 2): send the confirmation email, and when Swoogo API credentials are
-  // configured, register the guest with UATX directly instead of handing off.
-  return {
-    status: 'ok',
-    duplicate,
-    partnerUrl: event.rsvp.partner?.url,
-  };
+  // Confirmation email after the response is sent, so the dialog isn't kept waiting.
+  if (!result.duplicate && process.env.SMTP_URL) {
+    after(async () => {
+      const unsubscribeUrl = hasDatabase() ? await subscriberUnsubscribeUrl(email).catch(() => undefined) : undefined;
+      const mail = rsvpConfirmation(event, { email, firstName, unsubscribeUrl, manageUrl: result.manageToken ? manageRsvpUrl(result.manageToken) : undefined }, { partnerUrl });
+      await sendMail({ to: email, subject: mail.subject, html: mail.html, text: mail.text }).catch((err) => console.error('RSVP confirmation failed', err));
+    });
+  }
+  // TODO: when UATX's Swoogo API credentials are configured, register the guest
+  // with Swoogo here instead of handing off.
+  return { status: 'ok', duplicate: result.duplicate, waitlisted: result.status === 'waitlist', partnerUrl };
 }

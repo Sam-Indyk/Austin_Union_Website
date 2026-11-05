@@ -43,7 +43,7 @@ export function AnnouncementCard({ events, fallback }: Props) {
   const event = live.length ? live[index % live.length] : null;
 
   return (
-    <div className="announce">
+    <div className="announce" data-edit="events" data-edit-label="Homepage event card">
       <div className="announce__inner">
         <Link href="/" className="announce__seal" aria-label="Austin Union">
           <Image src="/media/site/seal.png" alt="" width={82} height={82} preload />
