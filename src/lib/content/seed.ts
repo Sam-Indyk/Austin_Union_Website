@@ -136,7 +136,9 @@ export const contact: ContactContent = {
 export const collage: CollagePhoto[] = collageTiles.map((t, i) => ({ id: `seed-${i}`, ...t }));
 
 const img = (slug: string, alt: string, focalY = 50) => ({ src: `/media/events/${slug}.jpg`, alt, focalX: 50, focalY });
-const recapPhoto = (name: string) => ({ src: `/media/events/${name}.jpg`, alt: '' });
+const recapPhoto = (name: string, alt = '') => ({ src: `/media/events/${name}.jpg`, alt });
+/** Recap galleries from the society's event photographs (Drive: Austin Union/Pictures). */
+const recapSet = (name: string, alts: string[]) => alts.map((alt, i) => recapPhoto(`recap-${name}-${i + 1}`, alt));
 
 // Times are the wall-clock times Wix displayed, in Austin (Central) time.
 export const events: EventItem[] = [
@@ -171,6 +173,19 @@ export const events: EventItem[] = [
     image: img('jonathan-pageau-ai-and-transhumanism', 'Jonathan Pageau: AI and Transhumanism'),
     rsvp: { mode: 'native', partner: { kind: 'swoogo', url: 'https://uaustin.swoogo.com/Jonathan-Pageau' } },
     featureOnHome: true,
+    recap: {
+      photos: recapSet('pageau', [
+        'Opening remarks at the podium',
+        'Jonathan Pageau at the podium',
+        'Jonathan Pageau speaking to a full room',
+        'The panel discussion',
+        'Jonathan Pageau in conversation',
+        'Jonathan Pageau with a guest after the talk',
+        'Guests talking after the event',
+        'A photo with Jonathan Pageau',
+        'Guests with Jonathan Pageau',
+      ]),
+    },
   },
   {
     id: 'evt-political-violence',
@@ -187,6 +202,19 @@ export const events: EventItem[] = [
     image: img('open-forum-is-political-violence-ever-justified', 'Open Forum: Is Political Violence Ever Justified?'),
     rsvp: { mode: 'native' },
     featureOnHome: true,
+    recap: {
+      photos: recapSet('political-violence', [
+        'A speaker addresses the house',
+        'A speech from the floor',
+        'Making a point to the house',
+        'A speaker takes the floor',
+        'A speaker addresses the room',
+        'A speaker during the debate',
+        'Members after the debate',
+        'Members after the debate',
+        'The house votes by a show of hands',
+      ]),
+    },
   },
   {
     id: 'evt-still-a-republic',
