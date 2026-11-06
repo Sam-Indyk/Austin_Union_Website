@@ -42,7 +42,6 @@ export async function sendMail(mail: Mail): Promise<void> {
   });
 }
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.austinunion.org';
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /** The house style shared by every email: seal, red masthead, serif body. */
