@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { getViewer } from '@/lib/auth/viewer';
 import { toEvent } from '@/lib/content/db-source';
 import { renderFor } from '@/lib/email/campaigns';
+import { forBrowser } from '@/lib/email/send';
 import { serviceClient } from '@/lib/supabase/clients';
 
 export async function GET(request: NextRequest, ctx: RouteContext<'/admin/events/[id]/email-preview'>) {
@@ -15,5 +16,5 @@ export async function GET(request: NextRequest, ctx: RouteContext<'/admin/events
   const settings = (await db.from('site_content').select('value').eq('key', 'settings').maybeSingle()).data?.value as { mailingAddress?: string } | undefined;
   const kind = request.nextUrl.searchParams.get('kind') === 'reminder' ? 'reminder' : 'announcement';
   const mail = renderFor(kind, toEvent(row), { email: viewer.contactEmail, firstName: viewer.firstName, unsubscribeUrl: '#', manageUrl: '#' }, settings?.mailingAddress);
-  return new NextResponse(mail.html, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
+  return new NextResponse(forBrowser(mail.html), { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 }

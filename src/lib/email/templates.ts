@@ -4,6 +4,7 @@
 import { googleCalendarUrl } from '@/lib/calendar';
 import type { EventItem } from '@/lib/content/types';
 import { formatCardDate, formatRange } from '@/lib/dates';
+import { LOGO_SRC } from './send';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.austinunion.org';
 const RED = '#7f1f20';
@@ -38,7 +39,7 @@ function shell({ preheader, body, footer }: { preheader: string; body: string; f
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${CREAM};padding:28px 10px;"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
 <tr><td align="center" style="padding:0 0 18px;">
-  <a href="${SITE}" style="text-decoration:none;"><img src="${SITE}/media/site/seal.png" width="64" height="64" alt="Austin Union Society" style="display:block;margin:0 auto 8px;"></a>
+  <a href="${SITE}" style="text-decoration:none;color:${RED};"><img src="${LOGO_SRC}" width="64" height="64" alt="" style="display:block;margin:0 auto 8px;border:0;"></a>
   <div style="font-family:${SERIF};font-size:13px;letter-spacing:4px;color:${INK};">AUSTIN UNION</div>
 </td></tr>
 <tr><td style="background:#ffffff;border:3px solid ${INK};">${body}</td></tr>

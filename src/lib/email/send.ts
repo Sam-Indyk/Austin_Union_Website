@@ -4,6 +4,17 @@
 // provider (e.g. Resend or Amazon SES SMTP).
 import 'server-only';
 import nodemailer, { type Transporter } from 'nodemailer';
+import { LOGO_PNG_BASE64 } from './logo';
+
+/**
+ * The seal travels inside each email (as an inline attachment) instead of being
+ * loaded from the website, so it appears even where web images are blocked.
+ */
+const LOGO_CID = 'seal@austinunion.org';
+export const LOGO_SRC = `cid:${LOGO_CID}`;
+
+/** For showing an email in a browser (admin previews), where cid: images can't load. */
+export const forBrowser = (html: string) => html.replaceAll(LOGO_SRC, `data:image/png;base64,${LOGO_PNG_BASE64}`);
 
 let transport: Transporter | undefined;
 
@@ -25,6 +36,9 @@ export async function sendMail(mail: Mail): Promise<void> {
   await getTransport().sendMail({
     from: process.env.EMAIL_FROM ?? 'Austin Union <events@austinunion.org>',
     ...mail,
+    attachments: mail.html.includes(LOGO_SRC)
+      ? [{ filename: 'austin-union.png', content: Buffer.from(LOGO_PNG_BASE64, 'base64'), cid: LOGO_CID, contentType: 'image/png', contentDisposition: 'inline' }]
+      : undefined,
   });
 }
 
@@ -38,7 +52,7 @@ export function layout({ title, body, cta }: { title: string; body: string; cta?
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ededE4;padding:32px 12px;"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border:3px solid #2f2e2e;">
 <tr><td style="background:#7f1f20;padding:28px 32px 22px;text-align:center;border-bottom:5px solid #f7b3b3;">
-<img src="${SITE}/media/site/seal.png" width="72" height="72" alt="Austin Union Society" style="display:block;margin:0 auto 12px;">
+<img src="${LOGO_SRC}" width="72" height="72" alt="" style="display:block;margin:0 auto 12px;">
 <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;letter-spacing:2px;color:#ffffff;">AUSTIN UNION</div></td></tr>
 <tr><td style="padding:32px 36px 12px;font-family:Georgia,'Times New Roman',serif;color:#2f2e2e;text-align:center;">
 <div style="font-size:22px;margin:0 0 12px;">${esc(title)}</div>${body}
